@@ -1,7 +1,7 @@
 <?php
 
-require_once('Picasa/Author.php');
-require_once('Picasa/Logger.php');
+require_once PICASA_API_BASE_DIR . '/Picasa/Author.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
  * Represents a Tag for Picasa photos.
@@ -18,44 +18,44 @@ class Picasa_Tag {
 	/**
 	 * The URL of the Atom feed for the tag.
 	 *
-	 * @var string 
+	 * @var string
 	 */
-	private $id;        
+	private $id;
 
 	/**
-	 * Time and date the tag was submitted. 
+	 * Time and date the tag was submitted.
 	 *
-	 * @var string 
+	 * @var string
 	 */
-	private $updated;   
+	private $updated;
 
 	/**
 	 * The title of the tag.
 	 *
-	 * @var string 
+	 * @var string
 	 */
-	private $title;    
+	private $title;
 
 	/**
-	 * The text of the tag.  
+	 * The text of the tag.
 	 *
-	 * @var string 
+	 * @var string
 	 */
-	private $summary;     
+	private $summary;
 
 	/**
-	 * The author of the comment.     
+	 * The author of the comment.
 	 *
 	 * @var {@link Picasa_Author}
 	 */
-	private $author;      
+	private $author;
 
 	/**
-	 * The number of times the tag occurs in the requested feed.           
+	 * The number of times the tag occurs in the requested feed.
 	 *
-	 * @var int 
+	 * @var int
 	 */
-	private $weight; 
+	private $weight;
 
 	/**
 	 * @return string
@@ -86,14 +86,14 @@ class Picasa_Tag {
 	}
 
 	/**
-	 * @return Picasa_Author 
+	 * @return Picasa_Author
 	 */
 	public function getAuthor () {
 		return $this->author;
 	}
 
 	/**
-	 * @return int 
+	 * @return int
 	 */
 	public function getWeight () {
 		return $this->summary;
@@ -132,7 +132,7 @@ class Picasa_Tag {
 	}
 
 	/**
-	 * @param Picasa_Author 
+	 * @param Picasa_Author
 	 * @return void
 	 */
 	public function setAuthor ($author) {
@@ -140,7 +140,7 @@ class Picasa_Tag {
 	}
 
 	/**
-	 * @param int 
+	 * @param int
 	 * @return void
 	 */
 	public function setWeight ($weight) {
@@ -151,7 +151,7 @@ class Picasa_Tag {
 	/**
 	 * Constructs a Picasa_Tag object from XML.
 	 *
-	 * @param SimpleXMLElement $tag   XML representing a Picasa tag.  
+	 * @param SimpleXMLElement $tag   XML representing a Picasa tag.
 	 */
 	public function __construct (SimpleXMLElement $tag=null) {
 	    if ($tag != null) {
@@ -179,10 +179,10 @@ class Picasa_Tag {
 	 */
 	public function __toString() {
     		$retString="
-      [ TYPE:         Picasa_Tag 
+      [ TYPE:         Picasa_Tag
         ID:           ".$this->id."
         UPDATED:      ".$this->updated."
-        TITLE:        ".$this->title." 
+        TITLE:        ".$this->title."
         SUMMARY:      ".$this->summary."
         WEIGHT:       ".$this->weight."
         AUTHOR:       ".$this->author."
@@ -197,9 +197,9 @@ class Picasa_Tag {
 	 * @param string $url             A URL pointing to a Picasa Atom feed that has zero or more "entry" nodes represeing
 	 *                                a Picasa tag.  Optional, the default is null.  If this parameter is null, the method will
 	 *                                try to get the XML content from the $xml parameter directly.
-	 * @param SimpleXMLElement $xml   XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa tag.  
+	 * @param SimpleXMLElement $xml   XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa tag.
 	 *                                Optional, the default is null.  If the $url parameter is null and the $xml parameter is null,
-	 *                                a {@Picasa_Exception} is thrown.  
+	 *                                a {@Picasa_Exception} is thrown.
 	 * @param boolean $useCache       You can decide not to cache a specific request by passing false here.  You may
 	 *                                want to do this, for instance, if you're requesting a private feed.
 	 * @throws Picasa_Exception       If the XML passed (through either parameter) could not be used to construct a {@link SimpleXMLElement}.
@@ -226,7 +226,7 @@ class Picasa_Tag {
 				}
 			}
 			if ($tagXml === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
 		}
 		try {
@@ -241,9 +241,9 @@ class Picasa_Tag {
 		foreach($xml->entry as $tag) {
 			$tagArray[$i] = new Picasa_Tag($tag);
 			$i++;
-		}			
+		}
 
 		return $tagArray;
-	}	
+	}
 
 }

@@ -1,10 +1,10 @@
 <?php
 
-require_once 'Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
  * Represents the simplest form of an image.  Contains attributes not specific to Picasa but global
- * to images of all types.  
+ * to images of all types.
  *
  * @package Picasa
  * @version Version 3.0
@@ -17,7 +17,7 @@ require_once 'Picasa/Logger.php';
 class Picasa_Thumbnail {
     	/**
 	 * The width of the thumbnail.
-	 * 
+	 *
 	 * @var array
 	 * @access private
 	 */
@@ -30,7 +30,7 @@ class Picasa_Thumbnail {
 	 * @access private
 	 * @var string
 	 */
-	private $height; 
+	private $height;
 
 	/**
 	 * The location of the image.
@@ -114,7 +114,7 @@ class Picasa_Thumbnail {
     [ TYPE:        Picasa_Thumbnail
       URL:         ".$this->url."
       WIDTH:       ".$this->width."
-      HEIGHT:      ".$this->height."         
+      HEIGHT:      ".$this->height."
     ]";
 		return $retstring;
 	}

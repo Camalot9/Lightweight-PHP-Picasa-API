@@ -1,12 +1,12 @@
 <?php
 
-require_once('Picasa/Comment.php');
-require_once('Picasa/Thumbnail.php');
-require_once('Picasa/Cache.php');
-require_once('Picasa/Logger.php');
+require_once PICASA_API_BASE_DIR . '/Picasa/Comment.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Thumbnail.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Cache.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
- * Represents a single image in a Picasa account.  
+ * Represents a single image in a Picasa account.
  *
  * @package Picasa
  * @version Version 3.0
@@ -18,7 +18,7 @@ require_once('Picasa/Logger.php');
 
 class Picasa_Image {
     	/**
-	 * An array that can be passed to stream_create_context() to get a context.  
+	 * An array that can be passed to stream_create_context() to get a context.
 	 * This context array
 	 * is used rather than just an auth token because the context array holds both the auth token
 	 * and the type of authentication that was performed.  The context can be passed as a parameter
@@ -36,7 +36,7 @@ class Picasa_Image {
 	 * @access private
 	 * @var string
 	 */
-	private $id; 
+	private $id;
 
 	/**
 	 * The title or file name of the photo.
@@ -47,7 +47,7 @@ class Picasa_Image {
 	private $title;
 
 	/**
-	 * The date that the image was last updated. 
+	 * The date that the image was last updated.
 	 *
 	 * @access private
 	 * @var string
@@ -63,16 +63,16 @@ class Picasa_Image {
 	private $description;
 
 	/**
-	 * A comma seperated list of keywords for the image (Deprecated, use $tags). 
+	 * A comma seperated list of keywords for the image (Deprecated, use $tags).
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $keywords;  
+	private $keywords;
 
 	/**
-	 * A URL to the smallest thumbnail provided by Picasa by default. 
-	 * 72px on the longest side by default. 
+	 * A URL to the smallest thumbnail provided by Picasa by default.
+	 * 72px on the longest side by default.
 	 * Although this field is deprecated, it can be used for simplicity.  The smallest thumbnail will
 	 * always be placed in this field, even if a custom thumbnail size is used.
 	 *
@@ -83,8 +83,8 @@ class Picasa_Image {
 	private $smallThumb;
 
 	/**
-	 * The middle thumbnail provided by Picasa by default.  
-	 * 144px on the longest side by default. 
+	 * The middle thumbnail provided by Picasa by default.
+	 * 144px on the longest side by default.
 	 * Even though this field is deprecated, it can be used for simplicity.  If two or more thumbnail sizes
 	 * are requested, this field will contain a link to the second-largest one.  If only one thumbnail size
 	 * is requested, this field will be null (so be careful).  By default, three thumbnails are requested
@@ -94,11 +94,11 @@ class Picasa_Image {
 	 * @var string
 	 * @deprecated Deprecated since Version 3.0.  Use $thumbUrlMap instead.
 	 */
-	private $mediumThumb;   
+	private $mediumThumb;
 
 	/**
-	 * The largest thumbnail provided by Picasa by default.  
-	 * 288px on the longest side by default. 
+	 * The largest thumbnail provided by Picasa by default.
+	 * 288px on the longest side by default.
 	 * Even though this field is deprecated, it can be used for simplicity.  If three or more thumbnail sizes
 	 * are requested, this field will contain a link to the third-largest one.  If only one or two thumbnail sizes
 	 * are requested, this field will be null (so be careful).  By default, three thumbnails are requested
@@ -108,10 +108,10 @@ class Picasa_Image {
 	 * @var string
 	 * @deprecated Deprecated since Version 3.0.  Use $thumbUrlMap instead.
 	 */
-	private $largeThumb;   
+	private $largeThumb;
 
 	/**
-	 * A mapping of thumbnail widths to the URLs for those thumbnails.  
+	 * A mapping of thumbnail widths to the URLs for those thumbnails.
 	 * This field was introduced because multiple thumbnail
 	 * sizes can be requested.  In order to keep track of which thumbnail URL is which size, this array was added.  In order to
 	 * not have to create a specific class that holds the thumbnail's URL, width, and height, the $thumbHeightMap array was created
@@ -119,7 +119,7 @@ class Picasa_Image {
 	 * the width as a key, use the same key to get its height.
 	 *
 	 * This is not really necessary if you request three or fewer thumbnail sizes at a time and you don't need to know the size
-	 * of them.  The deprecated fields $smallThumb, $mediumThumb, and $largeThumb will work just fine. 
+	 * of them.  The deprecated fields $smallThumb, $mediumThumb, and $largeThumb will work just fine.
 	 *
 	 * @access private
 	 * @var array
@@ -128,7 +128,7 @@ class Picasa_Image {
 	private $thumbUrlMap;
 
 	/**
-	 * A mapping of thumbnail widths to their respective heights.  
+	 * A mapping of thumbnail widths to their respective heights.
 	 * Use the thumbnail's width as a key to get it's height.  The
 	 * location of the thumbnail can be retrieved from the field {@link $thumbUrlMap} using, again, the width as a key.
 	 *
@@ -151,23 +151,23 @@ class Picasa_Image {
 	private $thumbnails;
 
 	/**
-	 * A downloadable link to the full size of the photo.  
+	 * A downloadable link to the full size of the photo.
 	 * This URL cannot be seen inside a <img> HTML tag.  Instead, use
 	 * thumbnails.  Though this field is deprecated, it can still be used for simplicity.  If only one size was requested
-	 * (which is the default case), then this field will contain the URL to that image size.  If more than one size is 
-	 * requested, this field will contain the URL of the smallest one. 
+	 * (which is the default case), then this field will contain the URL to that image size.  If more than one size is
+	 * requested, this field will contain the URL of the smallest one.
 	 *
 	 * @access private
 	 * @var string
 	 * @deprecated Deprecated since Version 3.0.  Use $contentUrlMap instead.
 	 */
-	private $content;     
+	private $content;
 
 	/**
-	 * A map of image widths to their respective URLs.  
+	 * A map of image widths to their respective URLs.
 	 * This map mimicks the {@link $thumbUrlMap} field, except these URLs
 	 * are not thumbnails and can't be used inside <img> HTML tags.  In practice, only one image size can be requested.  This
-	 * field was created because users who are 
+	 * field was created because users who are
 	 *
 	 * @access private
 	 * @var array
@@ -183,20 +183,20 @@ class Picasa_Image {
 	private $contentHeightMap;
 
 	/**
-	 * A unique number assigned to the image by Picasa, unique across all Picasa images. 
+	 * A unique number assigned to the image by Picasa, unique across all Picasa images.
 	 *
 	 * @access private
-	 * @var string 
+	 * @var string
 	 */
-	private $idnum;  
+	private $idnum;
 
 	/**
-	 * The original width of the image.  
+	 * The original width of the image.
 	 *
 	 * @access private
 	 * @var int
 	 */
-	private $width; 
+	private $width;
 
 	/**
 	 * The original height of the image.
@@ -204,18 +204,18 @@ class Picasa_Image {
 	 * @access private
 	 * @var int
 	 */
-	private $height; 
+	private $height;
 
 	/**
-	 * The id number of the Album the image is in. 
+	 * The id number of the Album the image is in.
 	 *
 	 * @access private
 	 * @var int
 	 */
-	private $albumid;    
+	private $albumid;
 
 	/**
-	 * The number of comments entered for the image. 
+	 * The number of comments entered for the image.
 	 *
 	 * @access private
 	 * @var string
@@ -223,15 +223,15 @@ class Picasa_Image {
 	private $commentCount;
 
 	/**
-	 * An array of strings, one for each keyword associated with the image. 
+	 * An array of strings, one for each keyword associated with the image.
 	 *
 	 * @access private
 	 * @var array
 	 */
-	private $tags;   
+	private $tags;
 
 	/**
-	 * An array of {@link Picasa_Comment} objects containing all the comments for the image. 
+	 * An array of {@link Picasa_Comment} objects containing all the comments for the image.
 	 *
 	 * @access private
 	 * @var array
@@ -242,7 +242,7 @@ class Picasa_Image {
 	 *
 	 *
 	 * @access private
-	 * @var {@link Picasa_Author} 
+	 * @var {@link Picasa_Author}
 	 */
 	private $author;
 
@@ -274,9 +274,9 @@ class Picasa_Image {
 	 *
 	 *
 	 * @access private
-	 * @var boolean 
+	 * @var boolean
 	 */
-	private $flash;	
+	private $flash;
 
 	/**
 	 *
@@ -360,7 +360,7 @@ class Picasa_Image {
 	private $timestamp;
 
 	/**
-	 * The location that the image was taken.  
+	 * The location that the image was taken.
 	 * The format is latitude and longitude, separated by a space.  This is often left blank,
 	 * the {@link Picasa_Album::$location} field is more reliable.
 	 *
@@ -388,14 +388,14 @@ class Picasa_Image {
 	 */
 	private $next;
 
-	/** 
+	/**
 	 * The URL to actual imagepage PicasaWeb.
 	 *
 	 * @access private
 	 * @var string
 	 */
 	private $weblink;
- 
+
 	/**
 	 * @access public
 	 * @return string
@@ -539,7 +539,7 @@ class Picasa_Image {
 	public function getAlbumid () {
 		return $this->albumid;
 	}
-	
+
 	/**
 	 * @access public
 	 * @return int
@@ -549,7 +549,7 @@ class Picasa_Image {
 	}
 
 	/**
-	 * Gets the comments for this image.  
+	 * Gets the comments for this image.
 	 * If the comments weren't supplied with the original image, this method will try to
 	 * retrieve them again just to make sure.
 	 *
@@ -565,7 +565,7 @@ class Picasa_Image {
 				$this->commentCount = $thisImg->getCommentCount();
 				$this->comments = $thisImg->getComments();
 			}
-		}  
+		}
 		return $this->comments;
 	}
 
@@ -581,7 +581,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return Picasa_Author
 	 */
-	public function getAuthor () {	
+	public function getAuthor () {
 		return $this->author;
 	}
 
@@ -589,7 +589,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getAlbumTitle () {	
+	public function getAlbumTitle () {
 		return $this->albumTitle;
 	}
 
@@ -597,7 +597,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getImageType () {	
+	public function getImageType () {
 		return $this->imageType;
 	}
 
@@ -605,7 +605,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getAlbumDescription () {	
+	public function getAlbumDescription () {
 		return $this->albumDescription;
 	}
 
@@ -613,15 +613,15 @@ class Picasa_Image {
 	 * @access public
 	 * @return boolean
 	 */
-	public function getFlash () {	
-		return $this->flash;	
+	public function getFlash () {
+		return $this->flash;
 	}
 
 	/**
 	 * @access public
 	 * @return float
 	 */
-	public function getFstop () {	
+	public function getFstop () {
 		return $this->fstop;
 	}
 
@@ -629,7 +629,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getCameraMake () {	
+	public function getCameraMake () {
 		return $this->cameraMake;
 	}
 
@@ -637,7 +637,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getCameraModel () {	
+	public function getCameraModel () {
 		return $this->cameraModel;
 	}
 
@@ -645,7 +645,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return float
 	 */
-	public function getExposure () {	
+	public function getExposure () {
 		return $this->exposure;
 	}
 
@@ -653,7 +653,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return float
 	 */
-	public function getFocalLength () {	
+	public function getFocalLength () {
 		return $this->focalLength;
 	}
 
@@ -661,7 +661,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return int
 	 */
-	public function getIso () {	
+	public function getIso () {
 		return $this->iso;
 	}
 
@@ -669,7 +669,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return string
 	 */
-	public function getTimeTaken () {	
+	public function getTimeTaken () {
 		return $this->timeTaken;
 	}
 
@@ -677,7 +677,7 @@ class Picasa_Image {
 	 * @access public
 	 * @return int
 	 */
-	public function getVersion () {	
+	public function getVersion () {
 		return $this->version;
 	}
 
@@ -685,12 +685,12 @@ class Picasa_Image {
 	 * @access public
 	 * @return boolean
 	 */
-	public function getCommentingEnabled () {	
+	public function getCommentingEnabled () {
 		return $this->commentingEnabled;
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getTimestamp() {
@@ -698,7 +698,7 @@ class Picasa_Image {
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getGmlPosition() {
@@ -706,29 +706,29 @@ class Picasa_Image {
 	}
 
 	/**
-	 * @return {@link Picasa_Image} 
+	 * @return {@link Picasa_Image}
 	 * @access public
 	 */
 	public function getPrevious() {
 		if ($this->previous === null) {
 			$this->loadPreviousAndNext();
 		}
-		return $this->previous; 
+		return $this->previous;
 	}
 
 	/**
-	 * @return {@link Picasa_Image} 
+	 * @return {@link Picasa_Image}
 	 * @access public
 	 */
 	public function getNext() {
 		if ($this->next === null) {
 			$this->loadPreviousAndNext();
 		}
-		return $this->next; 
+		return $this->next;
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getWeblink () {
@@ -840,7 +840,7 @@ class Picasa_Image {
 
 	/**
 	 * @access public
-	 * @param array 
+	 * @param array
 	 * @return void
 	 */
 	public function setThumbUrlMap ($thumbUrlMap) {
@@ -876,7 +876,7 @@ class Picasa_Image {
 
 	/**
 	 * @access public
-	 * @param array 
+	 * @param array
 	 * @return void
 	 */
 	public function setContentUrlMap ($contentUrlMap) {
@@ -960,7 +960,7 @@ class Picasa_Image {
 	 * @param Picasa_Author
 	 * @return void
 	 */
-	public function setAuthor ($author) {	
+	public function setAuthor ($author) {
 		$this->author = $author;
 	}
 
@@ -969,7 +969,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setAlbumTitle ($albumTitle) {	
+	public function setAlbumTitle ($albumTitle) {
 		$this->albumTitle = $albumTitle;
 	}
 
@@ -978,7 +978,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setImageType ($imageType) {	
+	public function setImageType ($imageType) {
 		$this->imageType = $imageType;
 	}
 
@@ -987,7 +987,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setAlbumDescription ($albumDescription) {	
+	public function setAlbumDescription ($albumDescription) {
 		$this->albumDescription = $albumDescription;
 	}
 
@@ -996,8 +996,8 @@ class Picasa_Image {
 	 * @param boolean
 	 * @return void
 	 */
-	public function setFlash ($flash) {	
-		$this->flash = $flash;	
+	public function setFlash ($flash) {
+		$this->flash = $flash;
 	}
 
 	/**
@@ -1005,7 +1005,7 @@ class Picasa_Image {
 	 * @param float
 	 * @return void
 	 */
-	public function setFstop ($fstop) {	
+	public function setFstop ($fstop) {
 		$this->fstop = $fstop;
 	}
 
@@ -1014,7 +1014,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setCameraMake ($cameraMake) {	
+	public function setCameraMake ($cameraMake) {
 		$this->cameraMake = $cameraMake;
 	}
 
@@ -1023,7 +1023,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setCameraModel ($cameraModel) {	
+	public function setCameraModel ($cameraModel) {
 		$this->cameraModel = $cameraModel;
 	}
 
@@ -1032,7 +1032,7 @@ class Picasa_Image {
 	 * @param float
 	 * @return void
 	 */
-	public function setExposure ($exposure) {	
+	public function setExposure ($exposure) {
 		$this->exposure = $exposure;
 	}
 
@@ -1041,7 +1041,7 @@ class Picasa_Image {
 	 * @param float
 	 * @return void
 	 */
-	public function setFocalLength ($focalLength) {	
+	public function setFocalLength ($focalLength) {
 		$this->focalLength = $focalLength;
 	}
 
@@ -1050,7 +1050,7 @@ class Picasa_Image {
 	 * @param int
 	 * @return void
 	 */
-	public function setIso ($iso) {	
+	public function setIso ($iso) {
 		$this->iso = $iso;
 	}
 
@@ -1059,7 +1059,7 @@ class Picasa_Image {
 	 * @param string
 	 * @return void
 	 */
-	public function setTimeTaken ($timeTaken) {	
+	public function setTimeTaken ($timeTaken) {
 		$this->timeTaken = $timeTaken;
 	}
 
@@ -1068,7 +1068,7 @@ class Picasa_Image {
 	 * @param int
 	 * @return void
 	 */
-	public function setVersion ($version) {	
+	public function setVersion ($version) {
 		$this->version = $version;
 	}
 
@@ -1077,13 +1077,13 @@ class Picasa_Image {
 	 * @param boolean
 	 * @return void
 	 */
-	public function setCommentingEnabled ($commentingEnabled) {	
+	public function setCommentingEnabled ($commentingEnabled) {
 		$this->commentingEnabled = $commentingEnabled;
 	}
 
 
 	/**
-	 * @param string  
+	 * @param string
 	 * @return void
 	 * @access public;
 	 */
@@ -1092,7 +1092,7 @@ class Picasa_Image {
 	}
 
 	/**
-	 * @param string  
+	 * @param string
 	 * @return void
 	 * @access public;
 	 */
@@ -1101,7 +1101,7 @@ class Picasa_Image {
 	}
 
 	/**
-	 * @param {@link Picasa_Image} 
+	 * @param {@link Picasa_Image}
 	 * @return void
 	 * @access public;
 	 */
@@ -1110,7 +1110,7 @@ class Picasa_Image {
 	}
 
 	/**
-	 * @param {@link Picasa_Image} 
+	 * @param {@link Picasa_Image}
 	 * @return void
 	 * @access public;
 	 */
@@ -1135,10 +1135,10 @@ class Picasa_Image {
 	 *                      the URL.  The URL parameter can be left blank, which will still produce a populated Image
 	 *                      object as long as the $albums parameter contains XML from the Picasa Atom feed for an image.
 	 * @param SimpleXMLElement $albums  XML describing a Picasa image.  This can be left blank as long as a URL is specified in the
-	 *                                  url parameter that returns valid XML for a Picasa image.  If both are null, a 
+	 *                                  url parameter that returns valid XML for a Picasa image.  If both are null, a
 	 *                                  {@link Picasa_Exception} is thrown.
 	 * @param array $contextArray       An array that can be passed to stream_context_create() to generate
-	 *                                  a PHP context.  See 
+	 *                                  a PHP context.  See
 	 *                                  {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache  You can decide not to cache a specific request by passing false here.  You may
 	 *                           want to do this, for instance, if you're requesting a private feed.
@@ -1167,7 +1167,7 @@ class Picasa_Image {
 				Picasa_Logger::getLogger()->logIfEnabled('Image retreived from cache.');
 			}
 			if ($xmldata == false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
 			try {
 				// Load the XML file into a SimpleXMLElement
@@ -1214,7 +1214,7 @@ class Picasa_Image {
 					$i++;
 					$thumb = $media_ns->group->thumbnail[$i];
 				}
-	
+
 				/* This is to support the previous implementation.  It may seem inefficiant to loop
 				 * through twice, but typically there will be 1-3 iterations, so it is inconsequential. */
 				$thumb = $media_ns->group->thumbnail[0];
@@ -1257,7 +1257,7 @@ class Picasa_Image {
 				$this->imageType = $thumbAtt['type'];
 
 
-				// Pull and parse the tags 
+				// Pull and parse the tags
 				if ($media_ns->group->keywords != null || strcmp($media_ns->group->keywords,"") != 0) {
 
 					// Make an array for to hold all of a photo's tags
@@ -1314,7 +1314,7 @@ class Picasa_Image {
 
 			if (array_key_exists("exif", $namespaces)) {
 				$exif_ns = $albums->children($namespaces["exif"]);
-				$this->flash = $exif_ns->tags->flash;	
+				$this->flash = $exif_ns->tags->flash;
 				$this->fstop = $exif_ns->tags->fstop;
 				$this->cameraMake = $exif_ns->tags->make;
 				$this->cameraModel = $exif_ns->tags->model;
@@ -1322,9 +1322,9 @@ class Picasa_Image {
 				$this->focalLength = $exif_ns->tags->focallength;
 				$this->iso = $exif_ns->tags->iso;
 			} else {
-				$this->flash = null; 
+				$this->flash = null;
 				$this->fstop = null;
-				$this->cameraMake = null;    
+				$this->cameraMake = null;
 				$this->cameraModel = null;
 				$this->exposure = null;
 				$this->focalLength = null;
@@ -1339,12 +1339,12 @@ class Picasa_Image {
 					$this->gmlPosition = @$gml_ns->Point->pos;
 				} else {
 				   	$this->gmlPosition = null;
-				}	
+				}
 			} else {
 			    	$this->gmlPosition = null;
 			}
 
-			// Set the basic attributes			
+			// Set the basic attributes
 			$this->id = $albums->id;
 			$this->title = $albums->title;
 			$this->updated = $albums->updated;
@@ -1376,8 +1376,8 @@ class Picasa_Image {
 					$this->comments[$i] = new Picasa_Comment($comment);
 					$i++;
 				}
-			} 					
-		}	
+			}
+		}
 	}
 
 
@@ -1391,14 +1391,14 @@ class Picasa_Image {
     [ TYPE:        Picasa_Image
       TITLE:       ".$this->title."
       DESCRIPTION: ".$this->description."
-      ID:          ".$this->id."         
-      WEBLINK:     ".$this->weblink."         
-      UPDATED:     ".$this->updated."      
-      KEYWORDS:    ".$this->keywords."   
-      SMALLTHUMB:  ".$this->smallThumb."   
-      MEDIUMTHUMB: ".$this->mediumThumb."  
-      LARGETHUMB:  ".$this->largeThumb."   
-      THUMBURLMAP: 
+      ID:          ".$this->id."
+      WEBLINK:     ".$this->weblink."
+      UPDATED:     ".$this->updated."
+      KEYWORDS:    ".$this->keywords."
+      SMALLTHUMB:  ".$this->smallThumb."
+      MEDIUMTHUMB: ".$this->mediumThumb."
+      LARGETHUMB:  ".$this->largeThumb."
+      THUMBURLMAP:
       [  ";
 	     	foreach ($this->thumbUrlMap as $width => $thumb) {
 	    		$retstring .="
@@ -1412,9 +1412,9 @@ class Picasa_Image {
 	    		$retstring .="
           ".$width."	=>  ".$thumb;
 		}
-		$retstring .=" 
+		$retstring .="
       ]
-      CONTENT:     ".$this->content."     
+      CONTENT:     ".$this->content."
       CONTENTURLMAP:
       [  ";
 	     	foreach ($this->contentUrlMap as $width => $thumb) {
@@ -1431,16 +1431,16 @@ class Picasa_Image {
 		}
 		$retstring .= "
       ]
-      IDNUM:       ".$this->idnum."        
-      WIDTH:       ".$this->width."        
-      HEIGHT:      ".$this->height."       
-      ALBUMID:     ".$this->albumid."      
-      COMMENTCOUNT:".$this->commentCount." 
-      COMMENTINGENABLED:".$this->commentingEnabled." 
+      IDNUM:       ".$this->idnum."
+      WIDTH:       ".$this->width."
+      HEIGHT:      ".$this->height."
+      ALBUMID:     ".$this->albumid."
+      COMMENTCOUNT:".$this->commentCount."
+      COMMENTINGENABLED:".$this->commentingEnabled."
       ALBUMTITLE:  ".$this->albumTitle."
       IMAGETYPE:   ".$this->imageType."
       ALBUMDESCRIPTION:".$this->albumDescription."
-      FLASH:       ".$this->flash."	
+      FLASH:       ".$this->flash."
       FSTOP:       ".$this->fstop."
       CAMERAMAKE:  ".$this->cameraMake."
       CAMERAMODEL: ".$this->cameraModel."
@@ -1457,11 +1457,11 @@ class Picasa_Image {
 		if (is_array($this->tags)) {
 			foreach ($this->tags as $tag) {
 		    	$retstring .= "
-      [ TYPE:        string";			    
+      [ TYPE:        string";
 			    $retstring .= "
         CONTENT:     ".$tag;
 			$retstring .="
-      ]";			    
+      ]";
 			}
 		}
 

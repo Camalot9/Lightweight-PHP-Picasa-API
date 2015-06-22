@@ -1,13 +1,13 @@
 <?php
 
-require_once 'Picasa/Image.php';
-require_once 'Picasa.php';
-require_once 'Picasa/Logger.php';
-require_once 'Picasa/Cache.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Image.php';
+require_once PICASA_API_BASE_DIR . '/Picasa.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Cache.php';
 
 /**
  * Holds a Picasa album.
- * 
+ *
  * @package Picasa
  * @version Version 3.0
  * @license http://www.gnu.org/licenses/ GNU Public License Version 3
@@ -29,7 +29,7 @@ class Picasa_Album {
 	private $contextArray;
 
 	/**
-	 * The username of the user who uploaded the album. 
+	 * The username of the user who uploaded the album.
 	 *
 	 * @var string
 	 * @access private
@@ -42,8 +42,8 @@ class Picasa_Album {
 	 *
 	 * @var string
 	 * @access private
-	 */	
-	private $id;          
+	 */
+	private $id;
 
 	/**
 	 * The image's title, as set by the author.
@@ -51,7 +51,7 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $title;    
+	private $title;
 
 	/**
 	 * The date the album was originally published.
@@ -59,15 +59,15 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $published;   
+	private $published;
 
 	/**
-	 * The date that the album was last updated. 
+	 * The date that the album was last updated.
 	 *
 	 * @var string
 	 * @access private
 	 */
-	private $updated;   
+	private $updated;
 
 	/**
 	 * It's unclear what this field is for.  It is likely blank.
@@ -75,7 +75,7 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $summary;  
+	private $summary;
 
 	/**
 	 * Indicates whether the album is public or private.
@@ -83,7 +83,7 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $rights;      
+	private $rights;
 
 	/**
 	 * The location that the album is listed as being taken at.
@@ -91,23 +91,23 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $location;    
+	private $location;
 
 	/**
-	 * An array of {@link Picasa_Image} objects representing each photo in the album. 
+	 * An array of {@link Picasa_Image} objects representing each photo in the album.
 	 *
 	 * @var array
 	 * @access private
 	 */
-	private $images;    
+	private $images;
 
 	/**
-	 * The URL of the album's cover (160px x 160px). 
+	 * The URL of the album's cover (160px x 160px).
 	 *
 	 * @var string
 	 * @access private
 	 */
-	private $icon;    
+	private $icon;
 
 	/**
 	 * A numberic value assigned to the album by Picasa, unique across all Picasa albums.
@@ -115,7 +115,7 @@ class Picasa_Album {
 	 * @var string
 	 * @access private
 	 */
-	private $idnum; 
+	private $idnum;
 
 	/**
 	 * A description of the album, entered by the author.
@@ -128,13 +128,13 @@ class Picasa_Album {
 	/**
 	 * The number of photos in the album.
 	 *
-	 * @var int 
+	 * @var int
 	 * @access private
 	 */
 	private $numphotos;
 
 	/**
-	 * A Picasa_Author object representing the album's author. 
+	 * A Picasa_Author object representing the album's author.
 	 *
 	 * @var {@link Picasa_Author}
 	 * @access private
@@ -144,7 +144,7 @@ class Picasa_Album {
 	/**
 	 * An array of {@link Picasa_Tag} objects representing all tags found in the album.
 	 *
-	 * @var array 
+	 * @var array
 	 * @access private
 	 * @since Version 2.0
 	 */
@@ -223,7 +223,7 @@ class Picasa_Album {
 	 */
 	private $timestamp;
 
-	/** 
+	/**
 	 * The URL to album PicasaWeb.
 	 *
 	 * @access private
@@ -306,7 +306,7 @@ class Picasa_Album {
 	 */
 	public function getImages () {
 	    	/* If $this originally came from xml in an Account object, $this->images will be null.  In that case, get the album
-		   directly from a url, which will include all the images, and then just take the images field from that album.  A 
+		   directly from a url, which will include all the images, and then just take the images field from that album.  A
 		   tad inneficient, but only marginally so.  And it's better than just not having access to the images. */
 		if ($this->images === null && $this->numphotos > 0) {
 			Picasa_Logger::getLogger()->logIfEnabled("Images was null, requesting from Picasa...");
@@ -413,7 +413,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @return array 
+	 * @return array
 	 * @access public
 	 */
 	public function getComments() {
@@ -427,7 +427,7 @@ class Picasa_Album {
 
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getEditLink() {
@@ -435,7 +435,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getTimestamp() {
@@ -443,7 +443,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getWeblink () {
@@ -523,7 +523,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @param array 
+	 * @param array
 	 * @return void
 	 * @access public;
 	 */
@@ -604,7 +604,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @param boolean 
+	 * @param boolean
 	 * @return void
 	 * @access public;
 	 */
@@ -632,7 +632,7 @@ class Picasa_Album {
 
 
 	/**
-	 * @param string  
+	 * @param string
 	 * @return void
 	 * @access public;
 	 */
@@ -641,7 +641,7 @@ class Picasa_Album {
 	}
 
 	/**
-	 * @param string  
+	 * @param string
 	 * @return void
 	 * @access public;
 	 */
@@ -659,21 +659,21 @@ class Picasa_Album {
 	}
 
 	/**
-	 * Constructs an Album object.  
-	 * When called, this method will fill out each private member	
+	 * Constructs an Album object.
+	 * When called, this method will fill out each private member
 	 * of the Album object based on XML returned from Picasa's Atom feed.  It will also create
-         * a Picasa_Image object for each image in the Album by passing XML for each image into 
-         * the Picasa_Image constructor.	
+         * a Picasa_Image object for each image in the Album by passing XML for each image into
+         * the Picasa_Image constructor.
 	 *
 	 * @param string $url   The URL of the Picasa query to retrieve the XML from.  See
 	 *                      http://code.google.com/apis/picasaweb/gdata.html for information on
 	 *                      how to format the URL.  If null, it is assumed that $albums param
 	 *                      has been supplied.
-	 * @param SimpleXMLElement $albums  XML for constructing the object.  If null, it is assumed that the 
+	 * @param SimpleXMLElement $albums  XML for constructing the object.  If null, it is assumed that the
 	 *                                  URL to the Atom feed has been supplied.  If both are null, a
 	 *                                  {@link Picasa_Exception} is thrown.
 	 * @param array $contextArray       An array that can be passed to stream_context_create() to generate
-	 *                                  a PHP context.  See 
+	 *                                  a PHP context.  See
 	 *                                  {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache  You can decide not to cache a specific request by passing false here.  You may
 	 *                           want to do this, for instance, if you're requesting a private feed.
@@ -702,7 +702,7 @@ class Picasa_Album {
 				}
 			}
 			if ($xmldata === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
 			try {
 				// Load the XML file into a SimpleXMLElement
@@ -712,7 +712,7 @@ class Picasa_Album {
 			}
 
 			// I'm not sure why there's a difference, but the icon is given in different ways
-			// depending on if the document is just for an Album or if it's part of a larger document			
+			// depending on if the document is just for an Album or if it's part of a larger document
 			$this->icon = $albums->icon;
 		}
 	    	// Whether or not the contextArray is null, it should be set.
@@ -786,7 +786,7 @@ class Picasa_Album {
 				$i++;
 			}
 
-		}	
+		}
 	}
 
 	/**
@@ -796,22 +796,22 @@ class Picasa_Album {
 	 */
 	public function __toString() {
 		$retstring = "
-  [ TYPE:        Picasa_Album 
+  [ TYPE:        Picasa_Album
     AUTHOR:      ".$this->author."
     TITLE:       ".$this->title."
     SUBTITLE:    ".$this->subtitle."
     ICON:        ".$this->icon."
-    ID:          ".$this->id."        
-    WEBLINK:     ".$this->weblink."        
-    PUBLISHED:   ".$this->published." 
-    UPDATED:     ".$this->updated."  
-    SUMMARY:     ".$this->summary." 
-    RIGHTS:      ".$this->rights." 
-    LOCATION:    ".$this->location."     
-    IDNUM:       ".$this->idnum."     
-    NUMPHOTOS:   ".$this->numphotos."   
-    PICASAAUTHOR:".$this->picasaAuthor." 
-    TAGS:        ".$this->tags."	      
+    ID:          ".$this->id."
+    WEBLINK:     ".$this->weblink."
+    PUBLISHED:   ".$this->published."
+    UPDATED:     ".$this->updated."
+    SUMMARY:     ".$this->summary."
+    RIGHTS:      ".$this->rights."
+    LOCATION:    ".$this->location."
+    IDNUM:       ".$this->idnum."
+    NUMPHOTOS:   ".$this->numphotos."
+    PICASAAUTHOR:".$this->picasaAuthor."
+    TAGS:        ".$this->tags."
     GMLPOSITION: ".$this->gmlPosition."
     PHOTOSREMAINING:".$this->photosRemaining."
     BYTESUSED:   ".$this->bytesUsed."

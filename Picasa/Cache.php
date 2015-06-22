@@ -1,13 +1,13 @@
 <?php
 
-include_once 'Picasa/Logger.php';
+include_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
  * A simple chaching mechanism to reduce the number of calls made to the Picasa service.
  * This is an easy way to cache into flat files the XML feed returned by Picasa for many API calls.
  * This class uses the Singleton pattern so that caching can be turned on once for the client's
  * entire application.
- * 
+ *
  * @author Cameron Hinkle
  * @version Version 1.0
  * @license http://www.gnu.org/licenses/ GNU Public License Version 3
@@ -33,7 +33,7 @@ class Picasa_Cache {
 	 * Actually, this location is appended to PHP's include path.  This is done by default so a location
 	 * is chosen that PHP definitely has access to.  You can change this is the class's constructor.
 	 * It is highly recommended that you change this to whatever you want it to be if you do not
-	 * want the out of the box value because it is risky to change it within your client code. 
+	 * want the out of the box value because it is risky to change it within your client code.
 	 *
 	 * This path must be readable and writeable by php or caching will be disabled automatically.
 	 *
@@ -59,14 +59,14 @@ class Picasa_Cache {
 	private $enabled;
 
 	/**
-	 * The absolute path to store the cache files.  PHP must have write access to this path 
+	 * The absolute path to store the cache files.  PHP must have write access to this path
 	 * or caching will be turned off.
 	 *
 	 * @access private
 	 * @var string
 	 */
 	private $cachePath;
-	
+
 	/**
 	 * The number of seconds after any file is cached that it should be refreshed.  If a cache
 	 * key is accessed this number of seconds after it is initially set, the caching mechanism
@@ -84,7 +84,7 @@ class Picasa_Cache {
 	public function getCacheExpire() {
 		return $this->cacheExpire;
 	}
-	
+
 	/**
 	 * @access public
 	 * @return string
@@ -92,11 +92,11 @@ class Picasa_Cache {
 	public function getCachePath() {
 		return $this->cachePath;
 	}
-	
+
 	/**
 	 * @access public
 	 * @param string $cacheExpire
-	 * @return void 
+	 * @return void
 	 */
 	public function setCacheExpire($cacheExpire) {
 		$this->cacheExpire = $cacheExpire;
@@ -105,12 +105,12 @@ class Picasa_Cache {
 	/**
 	 * @access public
 	 * @param string $cacheExpire
-	 * @return void 
+	 * @return void
 	 */
 	public function setCachePath($cachePath) {
 		$this->cachePath = $cachePath;
 	}
-	
+
 	/**
 	 * Constructs a Cache object.  Declared as private for Singleton pattern so there is only one instance.
 	 *
@@ -143,7 +143,7 @@ class Picasa_Cache {
 				Picasa_Logger::getLogger()->logIfEnabled("Warning: Cache path exists but PHP cannot write to it.  Perhaps you need to give PHP write access?  In the meantime, caching has been disabled.");
 			$this->enabled = false;
 		}
-			
+
 	}
 
 	/**
@@ -165,7 +165,7 @@ class Picasa_Cache {
 	 * @access public
 	 * @param boolean $enabled	The value to set the enabled flag to.  true will cause xml feeds to be cached,
 	 *				false will cause xml feeds to always be downloaded fresh.  The default is true.
-	 */  
+	 */
 	public function setEnabled($enabled=true) {
 		$cache = self::getCache();
 		$cache->enabled = $enabled;
@@ -178,7 +178,7 @@ class Picasa_Cache {
 
 	/**
 	 * Just checks the value of the enabled flag.  Could be true or false.
-	 * 
+	 *
 	 * @access public
 	 * @return boolean	The value of the enabled flag or false if it's not set.
 	 */
@@ -227,7 +227,7 @@ class Picasa_Cache {
 				if (strcmp(".",$file) !== 0 && strcmp("..",$file) !== 0 && @unlink($this->getCachePath().$file) === false) {
 					Picasa_Logger::getLogger()->logIfEnabled("Unable to remove cache item: ".$file);
 					$success = false;
-				} 
+				}
 			}
 			if ($success) {
 				Picasa_Logger::getLogger()->logIfEnabled("Cache cleared.");
@@ -264,8 +264,8 @@ class Picasa_Cache {
 		{
 			return $this->cacheGet($this->getCacheKey($feedUrl));
 		}
-		return false; 
-	}	
+		return false;
+	}
 
 	/**
 	 * Caches the contents of a file.
@@ -316,7 +316,7 @@ class Picasa_Cache {
 	/**
 	 * Checks if a cache key has expired.
 	 *
-	 * @access private	
+	 * @access private
 	 * @param string $key	The cache key to check the validity of.
 	 * @return boolean		true if the cache key has passed its expiration time, false otherwise.
 	 * @see $cacheExpire
@@ -334,7 +334,7 @@ class Picasa_Cache {
 	/**
 	 * Checks the mere existance (not expiration) of a cache key.
 	 *
-	 * @access private	
+	 * @access private
 	 * @param string $key	The cache key to check the existance of.
 	 * @return boolean		true if the cache key exists, false otherwise.
 	 */
@@ -343,7 +343,7 @@ class Picasa_Cache {
 		{
 			return true;
 		}
-		return false; 
+		return false;
 	}
 }
 ?>

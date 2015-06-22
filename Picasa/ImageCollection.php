@@ -1,14 +1,14 @@
 <?php
 
-require_once 'Picasa/Image.php';
-require_once 'Picasa/Author.php';
-require_once 'Picasa/Exception.php';
-require_once 'Picasa.php';
-require_once 'Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Image.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Author.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception.php';
+require_once PICASA_API_BASE_DIR . '/Picasa.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
- * Represents a collection of images that are retrieved outside of an actual Album.  
- * An Image Collection is very similar to an album but it lacks certain attributes like a 
+ * Represents a collection of images that are retrieved outside of an actual Album.
+ * An Image Collection is very similar to an album but it lacks certain attributes like a
  * formal title and description.  The Picasa_ImageCollection class is appropriate if you
  * are retrieving images by date or tag, regardless of the Album they're in.
  *
@@ -32,12 +32,12 @@ class Picasa_ImageCollection {
 	private $author;
 
 	/**
-	 * The base URL to the feed that was requested. 
+	 * The base URL to the feed that was requested.
 	 *
 	 * @var string
 	 * @access private
 	 */
-	private $id; 
+	private $id;
 
 	/**
 	 * The title given to the collection.  Probably the author's username.
@@ -53,7 +53,7 @@ class Picasa_ImageCollection {
 	 * @var string
 	 * @access private
 	 */
-	private $updated; 
+	private $updated;
 
 	/**
 	 * An array of Picasa_Image objects.
@@ -61,7 +61,7 @@ class Picasa_ImageCollection {
 	 * @var array
 	 * @access private
 	 */
-	private $images; 
+	private $images;
 
 	/**
 	 * The URL to the icon for the collection, probably the author's icon.
@@ -69,20 +69,20 @@ class Picasa_ImageCollection {
 	 * @var string
 	 * @access private
 	 */
-	private $icon;  
+	private $icon;
 
 	/**
-	 * The subtitle for the collection.  Probably blank. 
+	 * The subtitle for the collection.  Probably blank.
 	 *
 	 * @var string
 	 * @access private
 	 */
-	private $subtitle;   
+	private $subtitle;
 
 	/**
 	 * A Picasa_Author object for the author of the collection.  Not all fields will be filled.
 	 *
-	 * @var {@link Picasa_Author} 
+	 * @var {@link Picasa_Author}
 	 * @access private
 	 * @since Version 2.0
 	 */
@@ -148,7 +148,7 @@ class Picasa_ImageCollection {
 	}
 
 	/**
-	 * @returnarray 
+	 * @returnarray
 	 * @access public;
 	 */
 	public function getImages () {
@@ -216,7 +216,7 @@ class Picasa_ImageCollection {
 	}
 
 	/**
-	 * @param array 
+	 * @param array
 	 * @return void
 	 * @access public
 	 */
@@ -257,11 +257,11 @@ class Picasa_ImageCollection {
          *
          * @param string $url    A query URL constructed according to the Picasa API documentation hosted by
 	 *                       Google at {@link http://code.google.com/apis/picasaweb/gdata.html#Add_Album_Manual_Web}.
-	 * @param SimpleXMLElement $albums  XML describing a Picasa image collection.  This can be left blank as long as a URL is 
-	 *                                  specified in the url parameter that returns valid XML for a Picasa image collection.  If both 
+	 * @param SimpleXMLElement $albums  XML describing a Picasa image collection.  This can be left blank as long as a URL is
+	 *                                  specified in the url parameter that returns valid XML for a Picasa image collection.  If both
 	 *                                  are null, a {@link Picasa_Exception} is thrown.
 	 * @param array $contextArray       An array that can be passed to stream_context_create() to generate
-	 *                                  a PHP context.  See 
+	 *                                  a PHP context.  See
 	 *                                  {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache  You can decide not to cache a specific request by passing false here.  You may
 	 *                           want to do this, for instance, if you're requesting a private feed.
@@ -286,7 +286,7 @@ class Picasa_ImageCollection {
 				}
 			}
 			if ($xmldata === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
 //print $xmldata;
 			try {
@@ -312,7 +312,7 @@ class Picasa_ImageCollection {
 			$this->id = $albums->id;
 			$this->title = $albums->title;
 			$this->updated = $albums->updated;
-			$this->icon = $albums->icon;	
+			$this->icon = $albums->icon;
 			$this->subtitle = $albums->subtitle;
 
 			if ($albums->author != null && $albums->author != "") {
@@ -344,15 +344,15 @@ class Picasa_ImageCollection {
     SUBTITLE:    ".$this->subtitle."
     ICON:        ".$this->icon."
     AUTHOR:      ".$this->author."
-    ID:          ".$this->id."      
-    UPDATED:     ".$this->updated."      
+    ID:          ".$this->id."
+    UPDATED:     ".$this->updated."
     TOTALRESULTS:".$this->totalResults."
     STARTINDEX:  ".$this->startIndex."
     ITEMSPERPAGE:".$this->itemsPerPage."
-    PICASAAUTHOR:".$this->picasaAuthor." 
+    PICASAAUTHOR:".$this->picasaAuthor."
     IMAGES:      ";
 		foreach ($this->images as $image) {
-		    $retstring .= $image; 
+		    $retstring .= $image;
 		}
 		$retstring.="
   ]";

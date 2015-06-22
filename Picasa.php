@@ -1,28 +1,30 @@
 <?php
 
-require_once 'Picasa/Image.php';
-require_once 'Picasa/ImageCollection.php';
-require_once 'Picasa/Album.php';
-require_once 'Picasa/Account.php';
-require_once 'Picasa/Comment.php';
-require_once 'Picasa/Tag.php';
-require_once 'Picasa/Author.php';
-require_once 'Picasa/Exception.php';
-require_once 'Picasa/Logger.php';
-require_once 'Picasa/Exception/CaptchaRequiredException.php';
-require_once 'Picasa/Exception/UnauthorizedException.php';
-require_once 'Picasa/Exception/BadRequestException.php';
-require_once 'Picasa/Exception/FailedAuthorizationException.php';
-require_once 'Picasa/Exception/FileNotFoundException.php';
-require_once 'Picasa/Exception/InternalServerErrorException.php';
-require_once 'Picasa/Exception/ConflictException.php';
-require_once 'Picasa/Exception/InvalidUsernameOrPasswordException.php';
+define('PICASA_API_BASE_DIR', __DIR__);
+
+require_once PICASA_API_BASE_DIR . '/Picasa/Image.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/ImageCollection.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Album.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Account.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Comment.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Tag.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Author.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/CaptchaRequiredException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/UnauthorizedException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/BadRequestException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/FailedAuthorizationException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/FileNotFoundException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/InternalServerErrorException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/ConflictException.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Exception/InvalidUsernameOrPasswordException.php';
 
 /**
- * The primary class for interactions with Picasa.  
+ * The primary class for interactions with Picasa.
  * This class was developed in order to let PHP Picasa developers stay away
  * from the low-level query building and request sending.  The Picasa class handles authorizations, including both AuthSub and
- * Client Login authorization establishment and management.  It also handles retrieving of image data from Picasa Web Albums, 
+ * Client Login authorization establishment and management.  It also handles retrieving of image data from Picasa Web Albums,
  * storing the information in classes inside the Picasa subfolder.  Additionally, photo posting, updating, and deleting is all
  * made easy through the Picasa class.  Essentially just determine what verb you want to do ("get", "post", "delete", or "update"),
  * then figure out what noun you want to perform the verb on ("album", "image", "tag", or "comment").  If you put the two words together,
@@ -33,7 +35,7 @@ require_once 'Picasa/Exception/InvalidUsernameOrPasswordException.php';
  * there is no caching mechanism with this API, this class has methods for storing and retrieving an authorization session from
  * the user's cookies.
  *
- * Because this class attempts to be so high level, not every single piece of Picasa's functionality options can be offered.  This API 
+ * Because this class attempts to be so high level, not every single piece of Picasa's functionality options can be offered.  This API
  * should cover a huge percentage of desired functionality.  However, in case there is something offered by Picasa's Data API that
  * is not offered through this API, the class was made to be easily extendible.  For instance, if Picasa one day offers the ability
  * to upload videos and the latest version of this API does not offer video uploads, a PHP programmer could write a class that extends
@@ -82,7 +84,7 @@ class Picasa {
 
 	/**
 	 * The base for queries that use the "media" path instead of the "feed" path.  This path is required
-	 * for updating the binary data in an image. 
+	 * for updating the binary data in an image.
 	 *
 	 * @var string
 	 * @static
@@ -91,7 +93,7 @@ class Picasa {
 	protected static $BASE_MEDIA_QUERY_URL = 'http://picasaweb.google.com/data/media/api';
 
 	/**
-	 * A number designated to represeting the Client Login method for Authorizing an object.  
+	 * A number designated to represeting the Client Login method for Authorizing an object.
 	 * There is no significance to the number assigned to this variable.
 	 *
 	 * @var int
@@ -101,7 +103,7 @@ class Picasa {
 	public static $AUTH_TYPE_CLIENT_LOGIN = 2;
 
 	/**
-	 * A number designated to represeting the AuthSub method for Authorizing an object.  
+	 * A number designated to represeting the AuthSub method for Authorizing an object.
 	 * There is no significance to the number assigned to this variable.
 	 *
 	 * @var string
@@ -130,67 +132,67 @@ class Picasa {
 
 
 	/**
-	 * The email address or username that this instantiation is associated with.  
-	 * The field isn't currently used for anything because 
+	 * The email address or username that this instantiation is associated with.
+	 * The field isn't currently used for anything because
 	 * the username is never captured when using AuthSub authentication, and it's not required when executing requests that require
 	 * authentication.
 	 *
-	 * @var string 
+	 * @var string
 	 * @access private
 	 */
 	private $emailAddress;
 
 	/**
-	 * A token supplied by Google after a successful attempt to authorize this object.  
+	 * A token supplied by Google after a successful attempt to authorize this object.
 	 * The Auth Token is like a Golden Ticket
 	 * for doing operations that require authorization.
 	 *
-	 * @var string 
+	 * @var string
 	 * @access private
 	 */
 	private $auth;
 
 	/**
-	 * An array that is in an acceptable format for the php function stream_context_create() to create a context.  
+	 * An array that is in an acceptable format for the php function stream_context_create() to create a context.
 	 * For an authorized instance, this array holds the HTTP header with the authorization information
-	 * necessary to make authenticated requests.  It is useful to have because it holds both the authorization 
+	 * necessary to make authenticated requests.  It is useful to have because it holds both the authorization
 	 * token as well as the authorization type in the same object.
 	 *
 	 * @link http://www.php.net/stream_context_create
-	 * @var array 
+	 * @var array
 	 * @access private
 	 */
 	private $contextArray;
 
 	/**
-	 * The type of authorization that has been used to authenticate this instance.  
+	 * The type of authorization that has been used to authenticate this instance.
 	 * It must either be {@link Picasa::$AUTH_TYPE_AUTH_SUB} or {@link Picasa::$AUTH_TYPE_CLIENT_LOGIN}.  The auth type is
 	 * required because the authorization header has to be formatted differently depending on what type
 	 * of authorization was used.
 	 *
 	 * @link http://code.google.com/apis/accounts/docs/AuthForWebApps.html
 	 * @link http://code.google.com/apis/accounts/docs/AuthForInstalledApps.html
-	 * @var int 
+	 * @var int
 	 * @access private
 	 */
 	private $authType;
 
 	/**
-	 * The constructor allows the instantiation of an unauthorized or authorized Picasa object.  
+	 * The constructor allows the instantiation of an unauthorized or authorized Picasa object.
 	 * All fields can be left blank
 	 * for an unauthorized instantiation.  If an unauthorized instantiation is created, the object can later be authorized
-	 * using {@link setAuthorizationInfo()}, {@link authorizeWithClientLogin()}, or {@link authorizeWithAuthSub()}. 
+	 * using {@link setAuthorizationInfo()}, {@link authorizeWithClientLogin()}, or {@link authorizeWithAuthSub()}.
 	 *
 	 * @access public
 	 * @param string $authToken    An string representing an authorization issued by Google.  If a valid token is supplied,
 	 *                             certain requests that are not allowed for unathorized objects are allowed.  Optional,
 	 *                             the default is null.
 	 * @param int $authType        An integer indicating what type of authorization was used.  Options are restricted to
-	 *                             {@link Picasa::$AUTH_TYPE_CLIENT_LOGIN} and {@link Picasa::$AUTH_TYPE_AUTH_SUB}.  If 
+	 *                             {@link Picasa::$AUTH_TYPE_CLIENT_LOGIN} and {@link Picasa::$AUTH_TYPE_AUTH_SUB}.  If
 	 *                             the $authToken is not null, this field has to be supplied.  Optional, default is null.
 	 * @param array $contextArray  The context array holds header information and can contain authorization information
 	 *                             in the headers.  Optional, the default is null.
-	 * @throws Picasa_Exception_FailedAuthorizationException If $authToken is supplied but not $authType, or 
+	 * @throws Picasa_Exception_FailedAuthorizationException If $authToken is supplied but not $authType, or
 	 *                                                       if $authToken is not equal to {@link Picasa::$AUTH_TYPE_CLIENT_LOGIN}
 	 *                                                       or {@link Picasa::$AUTH_TYPE_AUTH_SUB}.
 	 */
@@ -213,13 +215,13 @@ class Picasa {
 
 
 	/**
-	 * Sets the private fields in the object with authorization information that is passed in.  
+	 * Sets the private fields in the object with authorization information that is passed in.
 	 * The fields are accessed when requests that require authorization are executed.
 	 *
 	 * @access public
 	 * @param string $authToken An authorization token returned by Picasa when a successful authentication request is executed.
-	 * @param string $authType  A string indicating which type of authorization was requested.  Options are "ClientLogin" 
-	 *                          and "AuthSub".  ClientLogin allows authorization directly with a username and password 
+	 * @param string $authType  A string indicating which type of authorization was requested.  Options are "ClientLogin"
+	 *                          and "AuthSub".  ClientLogin allows authorization directly with a username and password
 	 *                          sent by the server, whereas AuthSub requires that the user be redirected to a login page hosted by Google.
 	 * @return void
 	 */
@@ -233,7 +235,7 @@ class Picasa {
 	 * Getter method for the $auth private field.
 	 *
 	 * @access public
-	 * @return string   The auth token supplied by executing a successful authentication request to Google.  
+	 * @return string   The auth token supplied by executing a successful authentication request to Google.
 	 *                  The same field is used regardless of the type of authorization requested.
 	 */
 	public function getAuthToken() {
@@ -252,8 +254,8 @@ class Picasa {
 	}
 
 	/**
-	 * Fetches the context array for this object.  
-	 * The context array is defined at all times, whether or not the object is authenticated.  However, when it is 
+	 * Fetches the context array for this object.
+	 * The context array is defined at all times, whether or not the object is authenticated.  However, when it is
 	 * authenticated, it becomes possible to include the authorization token in the array.
 	 *
 	 * @access public
@@ -275,11 +277,11 @@ class Picasa {
 	}
 
 	/**
-	 * Determines whether the instantiated Picasa object has been authenticated.  
-	 * In the case of a AuthSub authentication, the validity of the authentication is actually tested.  In the case of ClientLogin 
-	 * authentication, it just checks for the existence of the auth token; there is no way in Picasa's API 
-	 * to test the validity of a ClientLogin authentication.  If the instantiation has not been authenticated, 
-	 * this method will look for an auth token in the user's cookie and attempt to authenticate the object 
+	 * Determines whether the instantiated Picasa object has been authenticated.
+	 * In the case of a AuthSub authentication, the validity of the authentication is actually tested.  In the case of ClientLogin
+	 * authentication, it just checks for the existence of the auth token; there is no way in Picasa's API
+	 * to test the validity of a ClientLogin authentication.  If the instantiation has not been authenticated,
+	 * this method will look for an auth token in the user's cookie and attempt to authenticate the object
 	 * automatically, in which case true will be returned.
 	 *
 	 * @access public
@@ -309,7 +311,7 @@ class Picasa {
 	public function clearAuthentication() {
 		if (array_key_exists(Picasa::$COOKIE_NAME_AUTH_SUB_TOKEN, $_COOKIE)) {
 			@setcookie(Picasa::$COOKIE_NAME_AUTH_SUB_TOKEN, "");
-		} 
+		}
 		if (array_key_exists(Picasa::$COOKIE_NAME_CLIENT_LOGIN_TOKEN, $_COOKIE)) {
 			@setcookie(Picasa::$COOKIE_NAME_CLIENT_LOGIN_TOKEN, "");
 		}
@@ -321,7 +323,7 @@ class Picasa {
 	}
 
 	/**
-	 * Authorizes a Google email address through the Client Login method, described in Google's documentation 
+	 * Authorizes a Google email address through the Client Login method, described in Google's documentation
 	 * ({@link http://code.google.com/apis/accounts/docs/AuthForInstalledApps.html}).  This allows special functions such
 	 * as posting images and comments.
 	 *
@@ -336,19 +338,19 @@ class Picasa {
 	 *                               "companyName-applicationName-versionID".  Optional, the default is null.
 	 * @param string $loginToken     The token returned by Google when the CAPTCHA challenge was requested.  Use
 	 *                               {@link Picasa_Exception_CaptchaRequiredException::getCaptchaToken()} to get this value.  If the client
-	 *                               is not responding to a Captcha challenge, leave this null.  Optional, the default is null. 
+	 *                               is not responding to a Captcha challenge, leave this null.  Optional, the default is null.
 	 * @param string $loginCaptcha   The text input by the user representing the CAPTCHA challenge presented to them.  If the client
-	 *                               is not responding to a Captcha challenge, leave this null.  Optional, the default is null. 
+	 *                               is not responding to a Captcha challenge, leave this null.  Optional, the default is null.
 	 * @param boolean $saveAuthorizationToCookie  If this is true, the authorization token returned from Google is stored in the users'
 	 *                                            browser cookie so that it can be retrieved later and the user can be logged in without
 	 *                                            have to enter his email address and password (assuming the cookie and token both
 	 *                                            do not expire.  false will only store the token in the current instance, which is not
 	 *                                            persistent and disapears as soon as the page loads.  Optional, the default is true.
 	 * @param int $expires           The number of seconds after the cookie is set that it should expire.  If $saveAuthorizationToCookie
-	 *                               is false, this parameter is ignored.  Optional, the default is 2,592,000 seconds (30 days).                 
+	 *                               is false, this parameter is ignored.  Optional, the default is 2,592,000 seconds (30 days).
 	 * @param string $service        The service that the account is being authorized for.  Each service has a different service
 	 *                               code.  The code for Picasa is lh2, which is the default.
-	 * @return string                The authorization token returned by Google. 
+	 * @return string                The authorization token returned by Google.
 	 * @throws Picasa_Exception_CaptchaRequiredException             If the response from Google indicates that a CAPTCHA challenge is required.
 	 * @throws Picasa_Exception_InvalidUsernameOrPasswordException   If either the username or password that was supplied was invalid.
 	 * @throws Picasa_Exception      A more generic exception if a different type of error occurs.
@@ -393,7 +395,7 @@ class Picasa {
 		$this->setAuthorizationInfo($authString, Picasa::$AUTH_TYPE_CLIENT_LOGIN);
 		if ($saveAuthorizationToCookie) {
 			$this->saveAuthToCookie($expires);
-	    	}	    
+	    	}
 		return $authString;
 	}
 
@@ -411,14 +413,14 @@ class Picasa {
 	 * field.  The returned token is probably not useful in many cases, but there wasn't anything better to return.
 	 *
 	 * @access public
-	 * @param string $token   An authorization token supplied by Picasa in a URL parameter called "token" 
+	 * @param string $token   An authorization token supplied by Picasa in a URL parameter called "token"
 	 *                        after the user logs in through the Google-hosted login page.  Optional, the default
 	 *                        is null.  If null is passed, the token is taken from the $_GET superglobal.
-	 * @param boolean $saveAuthorizationToCookie If true, the returned authentication token is saved to the 
-	 *                                           user's cookie.  If false, just stores the token in the $auth 
+	 * @param boolean $saveAuthorizationToCookie If true, the returned authentication token is saved to the
+	 *                                           user's cookie.  If false, just stores the token in the $auth
 	 *                                           field of the current object. Optional, default is true.
-	 * @param int $expires    The number of seconds after the current time that the cookie should remain in 
-	 *                        the user's browser for.  Optional, default is 2592000 (30 days).  
+	 * @param int $expires    The number of seconds after the current time that the cookie should remain in
+	 *                        the user's browser for.  Optional, default is 2592000 (30 days).
 	 * @return string         The authorization token returned from Google.
 	 * @see redirectToLoginPage()
 	 * @link http://code.google.com/apis/accounts/docs/AuthForWebApps.html
@@ -429,7 +431,7 @@ class Picasa {
 		    		$token = @$_GET['token'];
 			} else {
 	    			throw new Picasa_Exception_FailedAuthorizationException("No token was found.  The token must either be passed to this method or accessible from the URL as a parameter.");
-			}			
+			}
 		}
 		$this->setAuthorizationInfo($token, Picasa::$AUTH_TYPE_AUTH_SUB);
 		$sessionToken = null;
@@ -447,7 +449,7 @@ class Picasa {
 
 
 	/**
-	 * Checks if an AuthSub authorization is valid by requesting the information from Picasa.  
+	 * Checks if an AuthSub authorization is valid by requesting the information from Picasa.
 	 * This method can only be used
 	 * on AuthSub authorizations; Picasa does not currently support this feature for Client Login authentications.
 	 *
@@ -458,7 +460,7 @@ class Picasa {
 	public function isAuthorizationValid() {
 		if ($this->authType == Picasa::$AUTH_TYPE_CLIENT_LOGIN) {
 			throw new Picasa_Exception("This method only applicable for AuthSub authorizations.");
-		}	
+		}
 		$host = 'www.google.com';
 		$path = '/accounts/AuthSubTokenInfo';
 		$header = array(1 => $this->getAuthHeader());
@@ -473,14 +475,14 @@ class Picasa {
 
 
 	/**
-	 * When authorizing with AuthSub, Picasa initially issues a single-use token, which can only be used once.  
+	 * When authorizing with AuthSub, Picasa initially issues a single-use token, which can only be used once.
 	 * This method will convert that single use token into a session token, which will remain valid for a very long time.
 	 *
 	 * @access public
 	 * @return string                    The authorization token returned from Google.
 	 * @throws {@link Picasa_Exception}  If something was wrong with the request to Picasa.  In this case the token will not
-	 *                                   be converted.  An exception subclass that is specific to the error encountered will 
-	 *                                   be thrown, so the client can catch the individual subclasses and respond accordingly. 
+	 *                                   be converted.  An exception subclass that is specific to the error encountered will
+	 *                                   be thrown, so the client can catch the individual subclasses and respond accordingly.
 	 */
 	public function convertFromSingleUseToSessionToken() {
 	    	$host='www.google.com';
@@ -492,7 +494,7 @@ class Picasa {
 			$authString = Picasa::getResponseValue($buf,"Token");
 			$this->setAuthorizationInfo($authString, Picasa::$AUTH_TYPE_AUTH_SUB);
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		return $authString;
 	}
@@ -520,19 +522,19 @@ class Picasa {
 			Picasa::do_request($host, $path, null, "GET", $header, "application/x-www-form-urlencoded", 'ssl://', 443);
 		    	$this->clearAuthentication();
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		return true;
 	}
 
 	/**
-	 * Saves the authentication token that was returned from Google to the user's browser in a cookie.  
+	 * Saves the authentication token that was returned from Google to the user's browser in a cookie.
 	 * This way it can be accessed later and if it's still valid, the user does not need to be required to log in again.  Since this deals
 	 * with cookies, no output can go to the browser before this method is called or it will fail.
 	 *
 	 * @access protected
-	 * @param int $expires    The number of seconds after the current time that the cookie should remain in the user's 
-	 *                        browser for.  Optional, default is2592000 (30 days).  
+	 * @param int $expires    The number of seconds after the current time that the cookie should remain in the user's
+	 *                        browser for.  Optional, default is2592000 (30 days).
 	 * @return boolean        The result of the call to PHP's {@see setcookie()} function.
 	 * @link http://us2.php.net/manual/en/function.setcookie.php
 	 */
@@ -545,14 +547,14 @@ class Picasa {
 	}
 
 	/**
-	 * Redirects the user to Google's AuthSub login page so that they can login to access restricted functions.  
+	 * Redirects the user to Google's AuthSub login page so that they can login to access restricted functions.
 	 * The URL in the $next parameter must be registered with Google.  At the URL specified there, the "token" value must be pulled from
-	 * the request and passed to {@see Picasa::authorizeWithAuthSub()} for the authorization to be complete. 
+	 * the request and passed to {@see Picasa::authorizeWithAuthSub()} for the authorization to be complete.
 	 *
 	 * @access public
 	 * @static
-	 * @param string $next The URL that the user should be redirected to after visiting the login page.  This URL must be 
-	 *                     registered with Google in advance.  See 
+	 * @param string $next The URL that the user should be redirected to after visiting the login page.  This URL must be
+	 *                     registered with Google in advance.  See
 	 *                     {@link http://code.google.com/apis/accounts/docs/RegistrationForWebAppsAuto.html}.
 	 * @param int $session Must be either 1 or 0.  This indicates if the login should be transferable to a session
 	 *                     token, which is valid for a long time, wherease the default token is only useable once.
@@ -566,7 +568,7 @@ class Picasa {
 
 
 	/**
-	 * Constructs the URL that the user should be redirected to in order to be authorized with the AuthSub method.  
+	 * Constructs the URL that the user should be redirected to in order to be authorized with the AuthSub method.
 	 * The URL is a page hosted by Google that will allow the user to login to his Picasa Account.  When the user returns to the client
 	 * domain (specified in the $next parameter), a token supplied, appended to the URL.  Retrieving that token (using
 	 * PHP's "$_GET" superglobal; the key is "token") and pass it to {@link authorizeWithAuthSub} to enable requests for the user
@@ -590,23 +592,23 @@ class Picasa {
 	 * Passing null for any of the parameters will leave it up to Picasa to define the default values.
 	 *
 	 * @access public
-	 * @param string $username The username on the account to get the albums for. 
+	 * @param string $username The username on the account to get the albums for.
 	 * @param int $maxResults  The maximum number of results to return.  Optional, the default is null.
-	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.  Optional, 
+	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.  Optional,
 	 *                         the default is null.
-	 * @param string $visibility Restrict the search to albums with the access rights specified here.  Options are "public", 
-	 *                           "private", and "all".  Authorization is required for "private" and "all" options.  Optional, 
+	 * @param string $visibility Restrict the search to albums with the access rights specified here.  Options are "public",
+	 *                           "private", and "all".  Authorization is required for "private" and "all" options.  Optional,
 	 *                           default is "public".
-	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200, 
-	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in 
-	 *                         the $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default 
-	 *                         value will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, 
+	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200,
+	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in
+	 *                         the $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default
+	 *                         value will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb,
 	 *                         $mediumThumb, and $largeThumb fields of the {@link Picasa_Image} class.
-	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 
-	 *                         32, 48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 
-	 *                         1440, 1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other 
-	 *                         values can only be downloaded directly through the user's browser.  Optional, default value is 
-	 *                         null.  The default value will let Picasa determine the size to return, which will not be useable 
+	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are
+	 *                         32, 48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280,
+	 *                         1440, 1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other
+	 *                         values can only be downloaded directly through the user's browser.  Optional, default value is
+	 *                         null.  The default value will let Picasa determine the size to return, which will not be useable
 	 *                         within a <a> tag.
 	 * @return Picasa_Account  An Account including all albums within the specified user's account.
 	 * @throws {@link Picasa_Exception}        If the request was somehow invalid.  This could mean that the requested object
@@ -629,7 +631,7 @@ class Picasa {
 		try {
 			Picasa_Logger::getLogger()->logIfEnabled("Fetching albums for user ".$username);
 			$account = new Picasa_Account($query, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $account;
@@ -642,29 +644,29 @@ class Picasa {
 	 * @access public
 	 * @param string $username The username on the account to get the images for.  Optional, default is null.
 	 * @param int $maxResults  The maximum number of results to return.  Optional, the default is null.
-	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.  
+	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.
 	 *                         Optional, the default is null.
-	 * @param string $keywords Space-delimited list of keywords to search for.  Title and description are included 
+	 * @param string $keywords Space-delimited list of keywords to search for.  Title and description are included
 	 *                         in the search.  Optional, default is an empty string.
-	 * @param string $tags     Space-delimited list of tags to search for.  Only images with all tags in the list are 
+	 * @param string $tags     Space-delimited list of tags to search for.  Only images with all tags in the list are
 	 *                         included in the search results.  Optional, default is empty string.
-	 * @param string $visibility  Restrict the search to images with the access rights specified here.  Options are 
-	 *                            "public", "private", and "all".  Authorization is required for "private" and "all" options.  
+	 * @param string $visibility  Restrict the search to images with the access rights specified here.  Options are
+	 *                            "public", "private", and "all".  Authorization is required for "private" and "all" options.
 	 *                            Optional, default is "public".
-	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 
-	 *                         200, 288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored 
-	 *                         in the $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default 
-	 *                         value will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb, 
+	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160,
+	 *                         200, 288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored
+	 *                         in the $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default
+	 *                         value will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb,
 	 *                         and $largeThumb fields of the {@link Picasa_Image} class.
-	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32, 
-	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440, 
-	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can 
-	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The 
+	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32,
+	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440,
+	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can
+	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The
 	 *                         default value will let Picasa determine the size to return, which will not be useable within a <a> tag.
 	 * @param string $sortDescending Whether or not to sort the items returned by date added descending.
-	 * @param string $boundingBox	Searches for images tagged as having been taken within a set of four coordinates. The 
+	 * @param string $boundingBox	Searches for images tagged as having been taken within a set of four coordinates. The
 	 *				coordinates should be in the order west, south, east, north
-	 * @param string $location	Searches for photos tagged as having been taken at a named location.  For instance "London". 
+	 * @param string $location	Searches for photos tagged as having been taken at a named location.  For instance "London".
 	 * @return Picasa_ImageCollection          An object holding meta information about the requested feed, as well as an array of
 	 *                                         {@link Picasa_Image} objects with each object that meets the supplied parameters.
 	 * @throws {@link Picasa_Exception}        If the request was somehow invalid.  This could mean that the requested object
@@ -691,36 +693,36 @@ class Picasa {
 
 		try {
 			$images = new Picasa_ImageCollection($query, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $images;
 	}
 
 	/**
-	 * Retrieves the Picasa web album with the specified id.  
+	 * Retrieves the Picasa web album with the specified id.
 	 * The album will contain all images that meet the specified criteria and is in the specified album.
 	 * Passing null for any of the parameters will leave it up to Picasa to define the default values.
 	 *
 	 * @access public
-	 * @param string $username The username on the account that the album is in. 
+	 * @param string $username The username on the account that the album is in.
 	 * @param string $albumid  The id number of the desired album.
 	 * @param int $maxResults  The maximum number of results to return.  Optional, the default is null.
-	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.  
+	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.
 	 *                         Optional, the default is null.
-	 * @param string $keywords Space-delimited list of keywords to search for.  Title and description are included in 
+	 * @param string $keywords Space-delimited list of keywords to search for.  Title and description are included in
 	 *                         the search.  Optional, default is an empty string.
-	 * @param string $tags     Space-delimited list of tags to search for.  Only images with all tags in the list are 
+	 * @param string $tags     Space-delimited list of tags to search for.  Only images with all tags in the list are
 	 *                         included in the search results.  Optional, default is empty string.
-	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200, 
-	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in the 
-	 *                         $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default value 
-	 *                         will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb, 
+	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200,
+	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in the
+	 *                         $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default value
+	 *                         will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb,
 	 *                         and $largeThumb fields of the {@link Picasa_Image} class.
-	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32, 
-	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440, 
-	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can 
-	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The 
+	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32,
+	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440,
+	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can
+	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The
 	 *                         default value will let Picasa determine the size to return, which will not be useable within a <a> tag.
 	 * @return Picasa_Album    An object representing the album with the supplied id.  Only photos in the album that meet
 	 *                                  the parameters passed into this method will be included in the album.  This way, you can
@@ -738,7 +740,7 @@ class Picasa {
 		$album = null;
 
 		// See if the instance is authenticated and don't use the cache if it is just in case
-		// Use a quick way to test for authentication because it would take too long to validate 
+		// Use a quick way to test for authentication because it would take too long to validate
 		$useCache = false;
 		if ($this->auth === null) {
 			$useCache = true;
@@ -746,22 +748,22 @@ class Picasa {
 
 		try {
 			Picasa_Logger::getLogger()->logIfEnabled("Fetching album ".$albumid." for user ".$username);
-			$album = new Picasa_Album($query, null, $this->contextArray, $useCache); 
-		} catch (Picasa_Exception $e) {	
+			$album = new Picasa_Album($query, null, $this->contextArray, $useCache);
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $album;
 	}
 
 	/**
-	 * Retrieves an Album as an Entry as opposed to a Feed.  
-	 * Picasa's data api makes a distinction between the two.  The 
+	 * Retrieves an Album as an Entry as opposed to a Feed.
+	 * Picasa's data api makes a distinction between the two.  The
 	 * two different types will sometimes contain different fields.  This method should only be used if you are sure that the
 	 * field you need is not accessible through a feed, only through an entry.  It is declared protected so that client code
 	 * cannot call it directly, only extensions of the Picasa class.
 	 *
-	 * @access protected 
-	 * @param string $username The username on the account that the album is in. 
+	 * @access protected
+	 * @param string $username The username on the account that the album is in.
 	 * @param string $albumid  The id number of the desired album.
 	 * @throws {@link Picasa_Exception}        If the request was somehow invalid.  This could mean that the requested object
 	 *                                         does not have permission to retrieve the feed or the parameters supplied are not
@@ -780,8 +782,8 @@ class Picasa {
 		}
 
 		try {
-			$album = new Picasa_Album($query, null, $this->contextArray, $useCache); 
-		} catch (Picasa_Exception $e) {	
+			$album = new Picasa_Album($query, null, $this->contextArray, $useCache);
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $album;
@@ -789,21 +791,21 @@ class Picasa {
 
 	/**
 	 * Retrieves the image with the given id.
-	 * 
+	 *
 	 * @access public
 	 * @todo                   Refactor to use buildQueryParams()
 	 * @param string $username The username on the account that the image is in.
 	 * @param string $albumid  The id number of the album that the image is located in.
 	 * @param string $imageid  The id number of the desired image.
-	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200, 
-	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in the 
-	 *                         $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default value 
-	 *                         will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb, 
+	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.  Options are 32, 48, 64, 72, 144, 160, 200,
+	 *                         288, 320, 400, 512, 576, 640, 720, 800.  URLs for the corresponding thumbnails are stored in the
+	 *                         $thumbUrlMap of the {@link Picasa_Image} class.  Optional, default is null.  The default value
+	 *                         will let Picasa choose the thumbnail sizes, which are stored in the $smallThumb, $mediumThumb,
 	 *                         and $largeThumb fields of the {@link Picasa_Image} class.
-	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32, 
-	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440, 
-	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can 
-	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The 
+	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.  Options are 32,
+	 *                         48, 64, 72, 144, 160, 200, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440,
+	 *                         1600.  Only values of 800 and less are displayable within a <a> HTML tag, all other values can
+	 *                         only be downloaded directly through the user's browser.  Optional, default value is null.  The
 	 *                         default value will let Picasa determine the size to return, which will not be useable within a <a> tag.
 	 * @return Picasa_Image    The requested image.
 	 * @throws {@link Picasa_Exception} If the request was somehow invalid.  For instance, if
@@ -829,7 +831,7 @@ class Picasa {
 	    	try {
 			Picasa_Logger::getLogger()->logIfEnabled("Fetching image ".$imageid." for user ".$username);
 			$image = new Picasa_Image(Picasa::$BASE_QUERY_URL.'/user/'.$username.'/albumid/'.$albumid.'/photoid/'.$imageid.$params, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $image;
@@ -837,12 +839,12 @@ class Picasa {
 
 
 	/**
-	 * Retrieves the image with the given id as an entry as opposed to a feed.   
-	 * Picasa's data api makes a distinction between the two.  The 
+	 * Retrieves the image with the given id as an entry as opposed to a feed.
+	 * Picasa's data api makes a distinction between the two.  The
 	 * two different types will sometimes contain different fields.  This method should only be used if you are sure that the
 	 * field you need is not accessible through a feed, only through an entry.  It is declared protected so that client code
 	 * cannot call it directly, only extensions of the Picasa class.
-	 * 
+	 *
 	 * @access protected
 	 * @param string $username The username on the account that the image is in.
 	 * @param string $albumid  The id number of the album that the image is located in.
@@ -861,16 +863,16 @@ class Picasa {
 
 	    	try {
 			$image = new Picasa_Image(Picasa::$BASE_ENTRY_QUERY_URL.'/user/'.$username.'/albumid/'.$albumid.'/photoid/'.$imageid, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $image;
 	}
 
 	/**
-	 * Retrieves tags that meet the supplied parameters.  
+	 * Retrieves tags that meet the supplied parameters.
 	 * Notice that this method will not retrieve tags specific to one
-	 * image.  To get tags by image, get an entire image object (using, for instance, {@link getImageById()}), 
+	 * image.  To get tags by image, get an entire image object (using, for instance, {@link getImageById()}),
 	 * and then call {@link Picasa_Image::getTags()} on that image.
 	 * Passing null for any of the parameters will leave it up to Picasa to define the default values.
 	 *
@@ -878,10 +880,10 @@ class Picasa {
 	 * @param string $username     The username on the account to get the tags out of.
 	 * @param string $albumid      The id number of the album that the requested tags are in.  Optional, the default is null.
 	 * @param int $maxResults      The maximum number of results to return.  Optional, the default is null.
-	 * @param int $startIndex      The first element number with the search results to return.  Useful for pagination.  Optional, 
+	 * @param int $startIndex      The first element number with the search results to return.  Useful for pagination.  Optional,
 	 *                             the default is null.
-	 * @param string $visibility   Restrict the search to tags in images with the access rights specified here.  
-	 *                             Options are "public", "private", and "all".  Authorization is required for "private" and 
+	 * @param string $visibility   Restrict the search to tags in images with the access rights specified here.
+	 *                             Options are "public", "private", and "all".  Authorization is required for "private" and
 	 *                             "all" options.  Optional, default is "public".
 	 * @return array               An array of {@link Picasa_Tag} objects, one for each tag in the requested feed.
 	 * @throws {@link Picasa_Exception}        If the request was somehow invalid.  This could mean that the requested object
@@ -903,9 +905,9 @@ class Picasa {
 			$useCache = true;
 		}
 
-	    	try {	    
+	    	try {
 			$tags = Picasa_Tag::getTagArray($query, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $tags;
@@ -914,7 +916,7 @@ class Picasa {
 
 	/**
 	 * Retrieves the comment with the given id.
-	 * 
+	 *
 	 * @access public
 	 * @param string $username   The username on the account that the comment is in.
 	 * @param string $albumid    The id number of the album that the comment is located in.
@@ -935,7 +937,7 @@ class Picasa {
 		try {
 		    	// Comments have to be retrieved with the entry url
 			$comment = new Picasa_Comment(null, Picasa::$BASE_ENTRY_QUERY_URL.'/user/'.$username.'/albumid/'.$albumid.'/photoid/'.$imageid.'/commentid/'.$commentid, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $comment;
@@ -943,7 +945,7 @@ class Picasa {
 
 
 	/**
-	 * Gets all comments that meet the criteria specified in the parameters.  
+	 * Gets all comments that meet the criteria specified in the parameters.
 	 * The client can request images specific to
 	 * just a user or to a user and an album.  To get comments specific to an image, use {@link getImageById()} and call
 	 * {@link Picasa_Image::getComments()} on the returned object.
@@ -955,14 +957,14 @@ class Picasa {
 	 * @param string $albumid     The id number of the album that the desired comments are in.  Optional, the default
 	 *                            is null.
 	 * @param int $maxResults     The maximum number of results to return.  Optional, the default is null.
-	 * @param int $startIndex     The first element number with the search results to return.  Useful for pagination.  
+	 * @param int $startIndex     The first element number with the search results to return.  Useful for pagination.
 	 *                            Optional, the default is null.
-	 * @param string $visibility  Restrict the search to comments in images with the access rights specified here.  
-	 *                            Options are "public", "private", and "all".  Authorization is required for "private" 
+	 * @param string $visibility  Restrict the search to comments in images with the access rights specified here.
+	 *                            Options are "public", "private", and "all".  Authorization is required for "private"
 	 *                            and "all" options.  Optional, default is "public".
 	 * @return array              An array of {@link Picasa_Comment} objects, one for each comment in the requested feed.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the requested feed.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the requested feed.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.
 	 */
@@ -981,7 +983,7 @@ class Picasa {
 
 		try {
 			$comments = Picasa_Comment::getCommentArray($query, null, $this->contextArray, $useCache);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $comments;
@@ -989,15 +991,15 @@ class Picasa {
 
 
 	/**
-	 * Retrieves contacts of the user specified in the parameter.  
+	 * Retrieves contacts of the user specified in the parameter.
 	 * A contact is a Picasa user who the specified user
 	 * has declared as a "Favorite".  Should return an empty array unless the current Picasa instantiation is authorized.
 	 *
 	 * @access public
 	 * @param string $username           The username on the account to get the contacts from.
 	 * @return array                     An array of {@link Picasa_Author} objects, one for each of the user's contacts.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the requested feed.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the requested feed.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.
 	 */
@@ -1005,7 +1007,7 @@ class Picasa {
 	    	$author = null;
 	    	try {
 	    		$author = Picasa_Author::getAuthorArray(Picasa::$BASE_QUERY_URL.'/user/'.$username.'/contacts?kind=user', null, $this->contextArray);
-		} catch (Picasa_Exception $e) {	
+		} catch (Picasa_Exception $e) {
 			throw $e;
 		}
 		return $author;
@@ -1029,11 +1031,11 @@ class Picasa {
 	 *                          that number has to be multiplied by 1000 to be used for this parameter.  Optional, the default is null.
 	 *                          If null is passed here, the timestamp will be set to the current time.
 	 * @param string $icon      The image that appears as the album cover.  Optional, the default is null.
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
 	 * @return Picasa_Album     The album that was posted to Picasa.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.
 	 */
@@ -1049,7 +1051,7 @@ class Picasa {
 		try {
 			$albumBuffer = Picasa::do_request($host,$path,$data, "POST", $header, "application/atom+xml");
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		//Picasa will return the image XML.  Parse the id field out and create an image out of it.
 		$startBracketPos = strpos($albumBuffer, "/albumid/") + 9;
@@ -1061,7 +1063,7 @@ class Picasa {
 		} catch (Picasa_Exception $e) {
 			throw new Picasa_Exception("The image was successfully uploaded, but then the following error was encountered: ".$e->getMessage(), $e->getResponse(), $e->getUrl());
 		}
-		return $uploadedAlbum;	
+		return $uploadedAlbum;
 	}
 
 
@@ -1073,7 +1075,7 @@ class Picasa {
 	 * @param string $albumid             The id number of the album to post the image to.
 	 * @param string $locationOnDisk      The path to the image on the local file system or network.  Although this parameter
 	 *                                    has "OnDisk" in the name, you can specify a URL.
-	 * @param string $type                The type of image that is being uploaded.  Picasa currently accepts "image/bmp", 
+	 * @param string $type                The type of image that is being uploaded.  Picasa currently accepts "image/bmp",
 	 *                                    "image/gif", "image/jpeg", and "image/png".
 	 * @param string $title               The title that the image will be given.
 	 * @param string $summary             A summary of what is in the image.  Optional, the default is an empty string.
@@ -1082,11 +1084,11 @@ class Picasa {
 	 *                                    if they shouldn't.  Optional, the default is true.
 	 * @param string $timestamp           The number of miliseconds after the Unix epoch (January 1st, 1970) that the image was taken (roughly).
 	 *                                    Optional, the default is null, which will set $timestamp to the current time.
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
-	 * @return Picasa_Image               The newly uploaded image. 
-	 * @throws {@link Picasa_Exception}   If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                    {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @return Picasa_Image               The newly uploaded image.
+	 * @throws {@link Picasa_Exception}   If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                    {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                    encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                    itself will be thrown.
 	 * @link http://code.google.com/support/bin/answer.py?answer=63316&topic=10973
@@ -1110,7 +1112,7 @@ Content-Type: application/atom+xml
 
 $metaXML
 --END_OF_PART
-Content-Type: $type 
+Content-Type: $type
 
 $fileContents
 --END_OF_PART--";
@@ -1134,7 +1136,7 @@ $fileContents
 		} catch (Picasa_Exception $e) {
 			throw new Picasa_Exception("The image was successfully uploaded, but then the following error was encountered: ".$e->getMessage(), $e->getResponse(), $e->getUrl());
 		}
-		return $uploadedImage;	
+		return $uploadedImage;
 	}
 
 	/**
@@ -1152,7 +1154,7 @@ $fileContents
 	public function postTag($username, $albumid, $imageid, $tag) {
 		$data = "<entry xmlns='http://www.w3.org/2005/Atom'>
 	<title>$tag</title>
-	<category scheme=\"http://schemas.google.com/g/2005#kind\" term=\"http://schemas.google.com/photos/2007#tag\"/> 
+	<category scheme=\"http://schemas.google.com/g/2005#kind\" term=\"http://schemas.google.com/photos/2007#tag\"/>
 </entry>";
 		$host = Picasa::$PICASA_URL;
 		$path = "/data/feed/api/user/$username/albumid/$albumid/photoid/$imageid";
@@ -1180,7 +1182,7 @@ $fileContents
 	 * @parameter string $albumid         The album id of the album that the image to comment on is in.
 	 * @parameter string $imageid         The image id of the image that the comment is for.
 	 * @parameter string $comment         The text of the comment.
-	 * @return Picasa_Comment             The comment that was posted. 
+	 * @return Picasa_Comment             The comment that was posted.
 	 * @throws {@link Picasa_Exception}   If there was a problem sending the comment.  For instance, if the
 	 *                                    object is not authenticated or the image does not exist.
 	 */
@@ -1194,9 +1196,9 @@ $fileContents
 		$authHeader = array (1 => $this->getAuthHeader());
 
 		try {
-			$imgBuffer = Picasa::do_request($host, $path, $data, "POST", $authHeader, "application/atom+xml"); 
+			$imgBuffer = Picasa::do_request($host, $path, $data, "POST", $authHeader, "application/atom+xml");
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		//Picasa will return the image XML.  Parse the id field out and create an image out of it.
 		$startBracketPos = strpos($imgBuffer, "<id>") + 4;
@@ -1214,7 +1216,7 @@ $fileContents
 
 
 	/**
-	 * Update the meta data associated with the specified album.  
+	 * Update the meta data associated with the specified album.
 	 * The fields identified by each parameter can be modified, however
 	 * which photos appear in an album are not.  Any parameters left null will remain their current value.
 	 *
@@ -1233,12 +1235,12 @@ $fileContents
 	 * @param string $timestamp The number of miliseconds after the Unix epoch (January 1, 1970) that the photos in the album were
 	 *                          taken.  Notice that the PHP time() functions returns the number of seconds since the epoch, so
 	 *                          that number has to be multiplied by 1000 to be used for this parameter.  Optional, the default is
-	 *                          null. 
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 *                          null.
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
-	 * @return Picasa_Album     The album that was updated. 
-	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @return Picasa_Album     The album that was updated.
+	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.
 	 */
@@ -1274,7 +1276,7 @@ $fileContents
 		try {
 			Picasa::do_request($host,$path,$data, "PUT", $header, "application/atom+xml");
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		try {
 		    	$retObj = $this->getAlbumById($username, $albumid);
@@ -1282,14 +1284,14 @@ $fileContents
 		    	throw new Picasa_Exception("The album was successfully updated but then the following error was encountered: ".$e->getMessage(), $e->getResponse(), $e->getUrl());
 		}
 		return $retObj;
-		
-	}	
+
+	}
 
 
 
 	/**
-	 * Updates an image in a Picasa Web Album.  This method can be used for updating just the meta data or the meta data and image itself.  
-	 * Passing null to any of the meta data parameters will cause that value in the album to not update.  
+	 * Updates an image in a Picasa Web Album.  This method can be used for updating just the meta data or the meta data and image itself.
+	 * Passing null to any of the meta data parameters will cause that value in the album to not update.
 	 * To just update the meta data and not the image itself, pass null to $newImageLocation and $type, and make sure at least
 	 * one of the meta data parameters is not null.  To update just the image contents and not the meta data, make sure all
 	 * meta data parameters are null and the image location is not.
@@ -1304,18 +1306,18 @@ $fileContents
 	 * @param string $commentingEnabled   Set to true if other users should be able to comment on the image and false
 	 *                                    if they shouldn't.  Optional, the default is null.
 	 * @param string $timestamp           The number of miliseconds after the Unix epoch (January 1st, 1970) that the image was taken (roughly).
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
-	 * @param string $newImageLocation    The path to the image on the local file system or network.  
+	 * @param string $newImageLocation    The path to the image on the local file system or network.
 	 *                                    You can specify a URL.  This parameter can be null, in which
 	 *                                    case only the meta data will be updated.
-	 * @param string $type                The type of image that is being uploaded.  Picasa currently accepts "image/bmp", 
+	 * @param string $type                The type of image that is being uploaded.  Picasa currently accepts "image/bmp",
 	 *                                    "image/gif", "image/jpeg", and "image/png".  This parameter can be null if the
 	 *                                    $locationOnDisk parameter is also null, in which case on the meta data of the image
 	 *                                    will be updated and the image itself will stay the same.
-	 * @return Picasa_Image               The image that was updated. 
-	 * @throws {@link Picasa_Exception}   If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                    {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @return Picasa_Image               The image that was updated.
+	 * @throws {@link Picasa_Exception}   If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                    {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                    encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                    itself will be thrown.
 	 * @link http://code.google.com/support/bin/answer.py?answer=63316&topic=10973
@@ -1350,7 +1352,7 @@ $fileContents
 			    	$timestamp = $uploadImage->getTimestamp();
 			}
 			$metaXML = Picasa::constructImageXML($title,$summary,$keywords,$commentingEnabled,$timestamp,$gmlPosition);
-		}    
+		}
 
 		// Get the binary data
 		if ($binaryUpdate) {
@@ -1366,30 +1368,30 @@ $fileContents
 
 		if ($metaUpdate && $binaryUpdate) {
 			$size = strlen($fileContents);
-			$path='/data/media/api/user/';	
+			$path='/data/media/api/user/';
 		    	$contentType = "multipart/related; boundary=\"END_OF_PART\"";
 			$authHeader = array (1 => $this->getAuthHeader(),
 		    	 	             2 => "MIME-version: 1.0\r\n");
 			$data = "\r\n
 Media multipart posting
---END_OF_PART		    
+--END_OF_PART
 Content-Type: application/atom+xml
 
 $metaXML
 --END_OF_PART
-Content-Type: $type 
+Content-Type: $type
 
 $fileContents
 --END_OF_PART--";
 		} else if ($metaUpdate) {
 		    	$contentType = "application/atom+xml";
 			$authHeader = array (1 => $this->getAuthHeader());
-			$path='/data/entry/api/user/';	
+			$path='/data/entry/api/user/';
 			$size = strlen($metaXML);
 			$data = $metaXML;
 		} else if ($binaryUpdate) {
 			$size = strlen($fileContents);
-			$path='/data/media/api/user/';	
+			$path='/data/media/api/user/';
 		    	$contentType = "$type";
 			$authHeader = array (1 => $this->getAuthHeader(),
 		    	 	             2 => "MIME-version: 1.0\r\n");
@@ -1401,7 +1403,7 @@ $fileContents
 
 		$path .= $username.'/albumid/'.$albumid.'/photoid/'.$imageid.'/'.$uploadImage->getVersion();
 		try {
-			Picasa::do_request($host, $path, $data, "PUT", $authHeader, $contentType); 
+			Picasa::do_request($host, $path, $data, "PUT", $authHeader, $contentType);
 		} catch (Picasa_Exception $e) {
 		   	throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
@@ -1416,16 +1418,16 @@ $fileContents
 
 
 	/**
-	 * Delete an entire album from Picasa Web Albums.  
+	 * Delete an entire album from Picasa Web Albums.
 	 * All images and information associated with the album
-	 * will be deleted and is not recoverable (so be careful!). 
+	 * will be deleted and is not recoverable (so be careful!).
 	 *
 	 * @access public
 	 * @param string $username  The username on the account that the album is in.
 	 * @param string $albumid   The id number of the album to delete.
 	 * @return boolean          True if the album was successfully deleted from Picasa.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.  In the case of an exception, the album is not deleted.
 	 */
@@ -1439,13 +1441,13 @@ $fileContents
 		try {
 			Picasa::do_request($host, $path, null, "DELETE", $header, "application/atom+xml");
 		} catch (Picasa_Exception $e) {
-			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());	
+			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 		return true;
 	}
 
 	/**
-	 * Deletes an image from a Picasa Web Album.  
+	 * Deletes an image from a Picasa Web Album.
 	 * The image and information associated with it will be deleted and
 	 * is not recoverable (so be careful!).
 	 *
@@ -1454,8 +1456,8 @@ $fileContents
 	 * @param string $albumid   The id number of the album that the image to delete is in.
 	 * @param string $imageid   The id number of the image to delete.
 	 * @return boolean          True if the image was successfully deleted from Picasa.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.  In the case of an exception, the album is not deleted.
 	 */
@@ -1469,15 +1471,15 @@ $fileContents
 		$header = array( 1 => $this->getAuthHeader());
 
 		try {
-			Picasa::do_request ($host, $path, $data, "DELETE", $header); 
+			Picasa::do_request ($host, $path, $data, "DELETE", $header);
 		} catch (Picasa_Exception $e) {
 			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
-		return true; 
+		return true;
 	}
 
 	/**
-	 * Deletes a tag applied to a specific image.  
+	 * Deletes a tag applied to a specific image.
 	 * Beware that Picasa does not throw an error if the client attempts
 	 * to delete a tag that does not exist, so the client will have to do error checking on its own.  If an album or
 	 * image that does not exist is supplied, an error will be thrown.
@@ -1490,7 +1492,7 @@ $fileContents
 	 * @return boolean                   true if the tag was successfully deleted.
 	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa. This includes if an invalid
 	 *                                   album or image was specified, but not if an invalid tag name was specified.
-	 */ 
+	 */
 	public function deleteTag ($username, $albumid, $imageid, $tag) {
 	        $host=Picasa::$PICASA_URL;
 		$path='/data/entry/api/user/'.$username.'/albumid/'.$albumid.'/photoid/'.$imageid.'/tag/'.$tag;
@@ -1501,7 +1503,7 @@ $fileContents
 		} catch (Picasa_Exception $e) {
 			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
-		return true; 
+		return true;
 	}
 
 
@@ -1514,11 +1516,11 @@ $fileContents
 	 * @param string $imageid            The id number of the image that the comment is on.
 	 * @param string $tag                The id number of the comment to delete.
 	 * @return boolean                   true if the comment was successfully deleted.
-	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of 
-	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was 
+	 * @throws {@link Picasa_Exception}  If something was wrong with the post to Picasa.  A specific subclass of
+	 *                                   {@link Picasa_Exception} will be thrown based on what kind of problem was
 	 *                                   encountered, unless the type of error was unknown, in which case {@link Picasa_Exception}
 	 *                                   itself will be thrown.  In the case of an exception, the album is not deleted.
-	 */ 
+	 */
 	public function deleteComment ($username, $albumid, $imageid, $commentid) {
 	        $host=Picasa::$PICASA_URL;
 		$path='/data/entry/api/user/'.$username.'/albumid/'.$albumid.'/photoid/'.$imageid.'/commentid/'.$commentid;
@@ -1526,15 +1528,15 @@ $fileContents
 
 		try {
 	    		Picasa::do_request($host,$path,null,"DELETE",$specialHeaders);
-			return true; 
+			return true;
 		} catch (Picasa_Exception $e) {
 			throw Picasa::getExceptionFromInvalidPost($e->getResponse(), $e->getMessage());
 		}
 	}
 
 	/**
-	 * Copies the album attributes along with all images in the album to a new username.   
-	 * This requires that the current object be authorized to post images to the 
+	 * Copies the album attributes along with all images in the album to a new username.
+	 * This requires that the current object be authorized to post images to the
 	 * destination username's account.  Tags are copied along with each image, however comments are not.
 	 * It's the caller's responsibility to make sure the album passed in is what they want copied; keep in mind
 	 * that some Picasa functions that fetch albums do not always return all the fields of an image so the parts
@@ -1545,7 +1547,7 @@ $fileContents
 	 * @param string $destinationUsername	The username of the account that the album will be copied to.
 	 * @param {@link Picasa_Album)		The album to copy.  This is the album object and not just the album id.
 	 * @returns {@link Picasa_Album}	The new album.
-	 * @throws {@link Picasa_Exception}	If the user is not authorized to create albums or upload images to the 
+	 * @throws {@link Picasa_Exception}	If the user is not authorized to create albums or upload images to the
 	 * 					destination account.
 	 */
 	public function copyAlbum($destinationUsername, Picasa_Album $album) {
@@ -1562,8 +1564,8 @@ $fileContents
 	}
 
 	/**
-	 * Copies an image with most attributes from one album to the other.  
-	 * This requires that the current object be authorized to post images to the destination 
+	 * Copies an image with most attributes from one album to the other.
+	 * This requires that the current object be authorized to post images to the destination
 	 * username's account.  Most attributes, including
 	 * tags, are copied, although comments are not.
 	 *
@@ -1600,10 +1602,10 @@ $fileContents
 	 public function authorizeFromCookie() {
 		if (array_key_exists(Picasa::$COOKIE_NAME_AUTH_SUB_TOKEN, $_COOKIE) && strcmp($_COOKIE[Picasa::$COOKIE_NAME_AUTH_SUB_TOKEN],"") !== 0) {
 			$this->setAuthorizationInfo($_COOKIE[Picasa::$COOKIE_NAME_AUTH_SUB_TOKEN], Picasa::$AUTH_TYPE_AUTH_SUB);
-			return true;	
+			return true;
 		} else if (array_key_exists(Picasa::$COOKIE_NAME_CLIENT_LOGIN_TOKEN, $_COOKIE) && strcmp($_COOKIE[Picasa::$COOKIE_NAME_CLIENT_LOGIN_TOKEN],"") !== 0) {
 			$this->setAuthorizationInfo($_COOKIE[Picasa::$COOKIE_NAME_CLIENT_LOGIN_TOKEN], Picasa::$AUTH_TYPE_CLIENT_LOGIN);
-			return true;	
+			return true;
 		} else {
 		    	return false;
 		}
@@ -1611,14 +1613,14 @@ $fileContents
 
 
 	/**
-	 * Builds a context array from the authorization information in the current instantiation.  
+	 * Builds a context array from the authorization information in the current instantiation.
 	 * This context array is used in several
 	 * places, including the constructors for {@link Picasa_Image} and {@link Picasa_Album}.  The context array is built in such a way
 	 * that it can be passed to PHP {@see stream_context_create()} to be used in GET requests.
 	 *
 	 * @access protected
-	 * @param boolean $doAuth       true if the authorization information should be included in the array, false otherwise.  Sometimes 
-	 *                              it may be desireable to do an unauthorized request for information from Picasa even when the 
+	 * @param boolean $doAuth       true if the authorization information should be included in the array, false otherwise.  Sometimes
+	 *                              it may be desireable to do an unauthorized request for information from Picasa even when the
 	 *                              client has established authorization.  Optional, the default is false.
 	 * @param string $method        The request type that will be used.  This context array in practice is typically only used directly
 	 *                              for the method {@see file_get_contents()}, which is a get request, so it is probably always correct
@@ -1627,7 +1629,7 @@ $fileContents
 	 * @param string $contentType   The type of content being sent in the request.  Optional, the default is application/x-www-form-urlencoded.
 	 * @return array                A context array that can be stored in {@link Picasa::$contextArray} and passed to the constructors for
 	 *                              other classes in the API such as {@link Picasa_Image} and {@link Picasa_Album}.
-	 * @link http://www.php.net/stream_context_create 
+	 * @link http://www.php.net/stream_context_create
 	 * @see Picasa::contextArray
 	 */
 	protected function constructContextArray($doAuth=false, $method="GET", $contentLength=0, $contentType="application/x-www-form-urlencoded") {
@@ -1640,7 +1642,7 @@ $fileContents
 		}
 		$header .= "Content-Type: ".$contentType."\r\nContent-Length: ".$contentLength."\r\nConnection: Close\r\n\r\n";
 
-		$opts = array( 
+		$opts = array(
 			'http' => array (
 			    	'method' => $method,
 				'header' => $header
@@ -1651,12 +1653,12 @@ $fileContents
 
 
 	/**
-	 * Executes a GET request on the $url passed in and traps the error code to pass with the exception.  
+	 * Executes a GET request on the $url passed in and traps the error code to pass with the exception.
 	 * This is necessary because queries in this API are executed using {@link file_get_contents} typically, which does not supply the response
 	 * code in the case of a response greater than 201 (it considers the file nonexistant in such a case and just returns false).
 	 * With this message, the client can get a useful error message that actually comes from Picasa.
 	 *
-	 * Note that this does not actually throw an exception, it just determines what kind of exception could be thrown 
+	 * Note that this does not actually throw an exception, it just determines what kind of exception could be thrown
 	 * based on the response.  It's up to the caller to actually throw the exception.
 	 *
 	 * @access public
@@ -1717,7 +1719,7 @@ $fileContents
 	}
 
 	/**
-	 * Matches the supplied $buf contents against several different HTTP response codes to determine what kind of Picasa_Exception to return.  
+	 * Matches the supplied $buf contents against several different HTTP response codes to determine what kind of Picasa_Exception to return.
 	 * Note that this does not actually throw an exception, it just determines what
 	 * kind of exception could be thrown based on the response.  It's up to the caller to actually throw the exception.
 	 *
@@ -1766,8 +1768,8 @@ $fileContents
 	}
 
 	/**
-	 * Constructs the line that is necessary for passing authorization information within the HTTP header to Picasa.  
-	 * The object must already be authenticated when this method is called.  Will work with 
+	 * Constructs the line that is necessary for passing authorization information within the HTTP header to Picasa.
+	 * The object must already be authenticated when this method is called.  Will work with
 	 * either AuthSub or Client Login authorizations.  Note that the line has "\r\n" already appended at the end
 	 * because it is required for HTTP headers.
 	 *
@@ -1794,7 +1796,7 @@ $fileContents
 	 * @param string $title     The title to assign to the created album.
 	 * @param string $summary   A summary to assign to the created album.  Optional, the default is an empty string.
 	 * @param string $icon      The image that appears as the album cover.
-	 * @param string $rights    The rights to assign to the created album.  This value must be "private" or "public".  
+	 * @param string $rights    The rights to assign to the created album.  This value must be "private" or "public".
 	 *                          Optional, the default is "public".
 	 * @param boolean $commentingEnabled  true allows logged in users to post comments in this album.  false
 	 *                                    disallows all commenting.  Optional, the default is true.
@@ -1802,8 +1804,8 @@ $fileContents
 	 * @param string $timestamp The number of miliseconds after the Unix epoch (January 1, 1970) that the photos in the album were
 	 *                          taken.  Notice that the PHP time() functions returns the number of seconds since the epoch, so
 	 *                          that number has to be multiplied by 1000 to be used for this parameter.  Optional, the default is
-	 *                          null.  Passing null here will set the timestamp to the current time. 
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 *                          null.  Passing null here will set the timestamp to the current time.
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
 	 * @param string $albumid   The id number of the album.  This is applicable if the XML is being built to update an existing album.
 	 * @return string           The XML for uploading the described album.
@@ -1854,7 +1856,7 @@ $fileContents
 	 * @param string $commentingEnabled   Set to true if other users should be able to comment on the image and false
 	 *                                    if they shouldn't.  Optional, the default is true.
 	 * @param string $timestamp           The number of miliseconds after the Unix epoch (January 1st, 1970) that the image was taken (roughly).
-	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude, 
+	 * @param string $gmlPosition         The location in the world that this image was taken.  The format is latitude and longitude,
 	 *                                    separated by a space.  Optional, the default is null.
 	 * @return string                     XML that can be sent to Picasa to create an image.
 	 */
@@ -1887,23 +1889,23 @@ $fileContents
 
 
 	/**
-	 * Constructs a string of optional query parameters for requesting a feed from Picasa.  
-	 * All parameters are optional, their defaults are all null.  Passing a null value for a parameter will exclude the 
+	 * Constructs a string of optional query parameters for requesting a feed from Picasa.
+	 * All parameters are optional, their defaults are all null.  Passing a null value for a parameter will exclude the
 	 * value from the parameter list.
 	 *
 	 * @access protected
 	 * @static
 	 * @param int $maxResults  The maximum number of results to return.
-	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination. 
+	 * @param int $startIndex  The first element number with the search results to return.  Useful for pagination.
 	 * @param string $keywords Space-delimited list of keywords to search for.
-	 * @param string $tags     Space-delimited list of tags to search for. 	 
+	 * @param string $tags     Space-delimited list of tags to search for.
 	 * @param string $visibility Restrict the search to comments in images with the access rights specified here.
-	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch. 
+	 * @param int $thumbsize   Comma-delimited list of thumbnail sizes to fetch.
 	 * @param int $imgmax      Size of image to return in the $content field of the {@link Picasa_Image} field.
 	 * @param string $location The location that the image was taken.
 	 * @param string $sortDescending Whether or not to sort the items returned by date added descending.
 	 * @param string $boundingBox	Geo coordinates to search for photos within in the order west, south, east, north.
-	 * @param string $location	Named location to search for photos in.  For example, London. 
+	 * @param string $location	Named location to search for photos in.  For example, London.
 	 * @return string          A string with optional query parameters strung together with ampersands.
 	 */
 	protected static function buildQueryParams($maxResults=null, $startIndex=null, $keywords=null, $tags=null, $visibility=null, $thumbsize=null, $imgmax=null, $location=null, $sortDescending=null, $boundingBox=null, $location=null) {
@@ -1954,7 +1956,7 @@ $fileContents
 
 
 	/**
-	 * Executes a request.  
+	 * Executes a request.
 	 * This is a pretty generic PHP function for the most part.  The only parts that are specific to Picasa
 	 * is the errors that are thrown.  PHP doesn't have a built in function that does this very well (although there are packages
 	 * for it that can be installed), so this manually sets the HTTP headers and parses the whole response.
@@ -1966,10 +1968,10 @@ $fileContents
 	 * @param string $data       Any data that should be sent along with the request.  If there is no data, leave it as null.
 	 * @param string $request    The type of request to perform.  Most common are GET, POST, PUT, and DELETE.  The type of
 	 *                           request to use for each Picasa function is defined in Picasa's official documentation.
-	 * @param array $specialHeaders  An array of strings of headers that should be sent with the request.  The headers that are 
+	 * @param array $specialHeaders  An array of strings of headers that should be sent with the request.  The headers that are
 	 *                               always sent are Host, Content-Type, and Content-Length.  The most common type of special
 	 *                               header is an authorization header from Google.  Note that even if there is only one special header,
-	 *                               it still must be in an array.  Also note that each line in the array should end in "\r\n" and 
+	 *                               it still must be in an array.  Also note that each line in the array should end in "\r\n" and
 	 *                               should be set in the array with double quotes, not single quotes, because "\r\n" is interpreted
 	 *                               differently by PHP if single quotes are used.  Optional, the default is null.
 	 * @param string $type       The type of content that will is being sent through the request.  Optional, the default is
@@ -1981,7 +1983,7 @@ $fileContents
 	 *                           uses port 80 and SSL uses port 443.  Optional, the default is 80.
 	 * @return string            The entire response, including headers, that was recieved from the host.
 	 * @throws {@link Picasa_Exception}  If a response of "200" or "201" is not recieved.  In this case, the entire contents of the response,
-	 *                                   including headers, is set to the $response field of the exception and the error supplied by 
+	 *                                   including headers, is set to the $response field of the exception and the error supplied by
 	 *                                   Picasa is set as the exceptions message.  The idea is that the calling method can search the
 	 *                                   response for a specific return code (for instance, a File Not Found or Forbidden error) and throw
 	 *                                   a more specific exception.  The caller can also search the response for values that are specific
@@ -2023,7 +2025,7 @@ $fileContents
 			return $buf;
 		} else {
 		    	/* In the response returned from Picasa, it is really hard to pull out the error message.
-			 * Its location is two lines below the "Connection: Close" line.  So that message is pulled 
+			 * Its location is two lines below the "Connection: Close" line.  So that message is pulled
 			 * out, if possible, and set as the Exception's message.  Also, the entire buffer is sent.
 			 * This way, the caller can throw it's own message by looking for its own response code.
 			 */
@@ -2043,16 +2045,16 @@ $fileContents
 							$buf .= @fgets($fp);
 						}
 					}
-				} 
+				}
 			}
 			if (!$break) {
 				$msg = Picasa::getResponseValue($buf,"Error");
 				if ($msg != null) {
 					$expMessage = $msg;
-				} 
+				}
 			}
-			throw new Picasa_Exception($expMessage, $buf, $host.$path);	
-		}		
+			throw new Picasa_Exception($expMessage, $buf, $host.$path);
+		}
 	}
 
 	/**
@@ -2063,7 +2065,7 @@ $fileContents
 	 * @access protected
 	 * @param string $response   The haystack to look for the key in.
 	 * @param string $key        The needle to look for in the haystack.
-	 * @return $string           The value associated with the key.  The value will be the string between the 
+	 * @return $string           The value associated with the key.  The value will be the string between the
 	 *                           key with an equals sign next to it, and the end of the line.  Returns null
 	 *                           if no value is found.
 	 */
@@ -2078,7 +2080,7 @@ $fileContents
 			$errStr = substr($response, $startPos, $endPos-$startPos);
 		}
 		return $errStr;
-	}	
+	}
 
 
 	/**
@@ -2095,7 +2097,7 @@ $fileContents
 			$authType = "AuthSub";
 		}
 
-		$retstring = " 
+		$retstring = "
 [ TYPE:        Picasa
   EMAILADDRESS:".$this->emailAddress."
   AUTH:        ".$this->auth."

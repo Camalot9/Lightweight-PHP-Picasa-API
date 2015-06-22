@@ -1,7 +1,7 @@
 <?php
 
-require_once('Picasa/Author.php');
-require_once('Picasa/Logger.php');
+require_once PICASA_API_BASE_DIR . '/Picasa/Author.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
 
 /**
  * Represents a comment left for a Picasa photo.
@@ -16,60 +16,60 @@ require_once('Picasa/Logger.php');
 class Picasa_Comment {
 
 	/**
-	 * The URL of the Atom feed for the comment.              
+	 * The URL of the Atom feed for the comment.
 	 *
 	 * @var string
 	 */
-	private $id;         
+	private $id;
 
 	/**
 	 * The time and date the comment was submitted.
 	 *
 	 * @var string
 	 */
-	private $published;   
+	private $published;
 
 	/**
-	 * The title of the comment.             
+	 * The title of the comment.
 	 *
 	 * @var string
 	 */
-	private $title;     
+	private $title;
 
 	/**
-	 * The time and date the comment was updated.  
+	 * The time and date the comment was updated.
 	 *
 	 * @var string
 	 */
-	private $updated;     
+	private $updated;
 
 	/**
-	 * The author of the comment.     
+	 * The author of the comment.
 	 *
 	 * @var {@link Picasa_Author}
 	 */
-	private $author;      
+	private $author;
 
 	/**
-	 * The unique numeric value assigned to the photo by Picasa.     
+	 * The unique numeric value assigned to the photo by Picasa.
 	 *
 	 * @var int
 	 */
-	private $photoid;     
+	private $photoid;
 
 	/**
-	 * The comment's text.      
+	 * The comment's text.
 	 *
 	 * @var string
 	 */
-	private $content;    
+	private $content;
 
 	/**
-	 * A unique number assigned to the comment.              
+	 * A unique number assigned to the comment.
 	 *
-	 * @var string 
+	 * @var string
 	 */
-	private $idnum;        
+	private $idnum;
 
 	/**
 	 * The username of the account the comment was posted to.
@@ -114,7 +114,7 @@ class Picasa_Comment {
 	}
 
 	/**
-	 * @return Picasa_Author 
+	 * @return Picasa_Author
 	 */
 	public function getAuthor () {
 		return $this->author;
@@ -135,7 +135,7 @@ class Picasa_Comment {
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 */
 	public function getIdnum () {
 		return $this->idnum;
@@ -188,7 +188,7 @@ class Picasa_Comment {
 	}
 
 	/**
-	 * @param Picasa_Author 
+	 * @param Picasa_Author
 	 * @return void
 	 */
 	public function setAuthor ($author) {
@@ -212,7 +212,7 @@ class Picasa_Comment {
 	}
 
 	/**
-	 * @param string 
+	 * @param string
 	 * @return void
 	 */
 	public function setIdnum ($idnum) {
@@ -242,11 +242,11 @@ class Picasa_Comment {
 	 * it was initially created without a $url or $contextArray parameter and to maintain backwards compatibility, the two
 	 * extra parameters had to be appended to the end.
 	 *
-	 * @param SimpleXMLElement $comments   XML representing a Picasa comment.  
+	 * @param SimpleXMLElement $comments   XML representing a Picasa comment.
 	 * @param string $url                  A URL pointing to the Atom feed for the requested data.  Optional, the default is null.
 	 *                                     If null is passed, the method assumes that the XML is supplied in the $comments parameter.
 	 * @param array $contextArray          An array that can be passed to stream_context_create() to generate
-	 *                                     a PHP context.  See 
+	 *                                     a PHP context.  See
 	 *                                     {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache            You can decide not to cache a specific request by passing false here.  You may
 	 *                                     want to do this, for instance, if you're requesting a private feed.
@@ -272,7 +272,7 @@ class Picasa_Comment {
 				}
 			}
 			if ($xmldata === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
 			try {
 				// Load the XML file into a SimpleXMLElement
@@ -282,11 +282,11 @@ class Picasa_Comment {
 			}
 		}
 
-		if ($comments != null) { 
+		if ($comments != null) {
 			$namespaces = $comments->getNamespaces(true);
 
 			$gphoto_ns = $comments->children($namespaces["gphoto"]);
-			
+
 			$this->id = $comments->id;
 			$this->published = $comments->published;
 			$this->title = $comments->title;
@@ -305,7 +305,7 @@ class Picasa_Comment {
 			$str = substr($this->id, $start);
 			$end = strpos($str, '/photoid');
 			$this->albumid = substr($str, 0, $end);
-		}	
+		}
 	}
 
 
@@ -316,12 +316,12 @@ class Picasa_Comment {
 	 */
 	public function __toString() {
     		$retString="
-      [ TYPE:        Picasa_Comment 
+      [ TYPE:        Picasa_Comment
         IDNUM:       ".$this->idnum."
         CONTENT:     ".$this->content."
         ID:          ".$this->id."
         PUBLISHED:   ".$this->published."
-        TITLE:       ".$this->title." 
+        TITLE:       ".$this->title."
         UPDATED:     ".$this->updated."
         PHOTOID:     ".$this->photoid."
 	AUTHOR:      ".$this->author."
@@ -338,11 +338,11 @@ class Picasa_Comment {
 	 * @param string $url                  A URL pointing to a Picasa Atom feed that has zero or more "entry" nodes represeing
 	 *                                     a Picasa comment.  Optional, the default is null.  If this parameter is null, the method will
 	 *                                     try to get the XML content from the $xml parameter directly.
-	 * @param SimpleXMLElement $xml        XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa comment.  
+	 * @param SimpleXMLElement $xml        XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa comment.
 	 *                                     Optional, the default is null.  If the $url parameter is null and the $xml parameter is null,
-	 *                                     a {@Picasa_Exception} is thrown.  
+	 *                                     a {@Picasa_Exception} is thrown.
 	 * @param array $contextArray          An array that can be passed to stream_context_create() to generate
-	 *                                     a PHP context.  See 
+	 *                                     a PHP context.  See
 	 *                                     {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache            You can decide not to cache a specific request by passing false here.  You may
 	 *                                     want to do this, for instance, if you're requesting a private feed.
@@ -375,7 +375,7 @@ class Picasa_Comment {
 			}
 
 			if ($commentXml === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url);	
+				throw Picasa::getExceptionFromInvalidQuery($url);
 			}
 		}
 		try {
@@ -387,14 +387,14 @@ class Picasa_Comment {
 
 		$commentArray = array();
 		$i = 0;
-		// Create a blank Album object for each album in the account 
+		// Create a blank Album object for each album in the account
 		foreach($xml->entry as $comment) {
 			$commentArray[$i] = new Picasa_Comment($comment);
 			$i++;
-		}			
+		}
 
 		return $commentArray;
-	}	
+	}
 
 
 

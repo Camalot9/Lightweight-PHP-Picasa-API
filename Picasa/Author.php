@@ -1,10 +1,10 @@
 <?php
 
-require_once('Picasa/Logger.php');
-require_once('Picasa/Cache.php');
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Cache.php';
 
 /**
- * Holds a Picasa user.  
+ * Holds a Picasa user.
  * Not all fields are guaranteed to be filled.  Name and Uri will likely always contain a valid value.
  * This class should certainly be called "User" instead, but it's way too late to change it now.
  *
@@ -32,15 +32,15 @@ class Picasa_Author {
 	 * @access private
 	 * @var string
 	 */
-	private $uri;  
+	private $uri;
 
     	/**
-	 * The username of the user. 
+	 * The username of the user.
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $user;      
+	private $user;
 
     	/**
 	 * The user's Picasa nickname.
@@ -48,7 +48,7 @@ class Picasa_Author {
 	 * @access private
 	 * @var string
 	 */
-	private $nickname;   
+	private $nickname;
 
     	/**
 	 * The address of an image selected by the user as their thumbnail.
@@ -56,7 +56,7 @@ class Picasa_Author {
 	 * @access private
 	 * @var string
 	 */
-	private $thumbnail;   
+	private $thumbnail;
 
     	/**
 	 * @return string
@@ -100,7 +100,7 @@ class Picasa_Author {
 
     	/**
 	 * @param string
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setName ($name) {
@@ -109,7 +109,7 @@ class Picasa_Author {
 
     	/**
 	 * @param string
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setUri ($uri) {
@@ -118,7 +118,7 @@ class Picasa_Author {
 
     	/**
 	 * @param string
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setUser ($user) {
@@ -127,7 +127,7 @@ class Picasa_Author {
 
     	/**
 	 * @param string
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setNickname ($nickname) {
@@ -136,7 +136,7 @@ class Picasa_Author {
 
     	/**
 	 * @param string
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setThumbnail ($thumbnail) {
@@ -163,12 +163,12 @@ class Picasa_Author {
 
 			// If this XML has an interior author entry, go into it
 			if ($author->author != null && $author->author->name != null && strcmp($author->author->name, "") != 0) {
-				$author = $author->author;		
+				$author = $author->author;
 			}
-			
+
 			$this->name = $author->name;
 			$this->uri = $author->uri;
-		}	
+		}
 	}
 
 	/**
@@ -178,10 +178,10 @@ class Picasa_Author {
 	 */
 	public function __toString() {
     		$retString="
-        [ TYPE:        Picasa_Author 
+        [ TYPE:        Picasa_Author
           NAME:        ".$this->name."
           USER:        ".$this->user."
-          NICKNAME:    ".$this->nickname." 
+          NICKNAME:    ".$this->nickname."
           THUMBNAIL:   ".$this->thumbnail."
 	]";
 
@@ -195,11 +195,11 @@ class Picasa_Author {
 	 * @param string $url                  A URL pointing to a Picasa Atom feed that has zero or more "entry" nodes represeing
 	 *                                     a Picasa author.  Optional, the default is null.  If this parameter is null, the method will
 	 *                                     try to get the XML content from the $xml parameter directly.
-	 * @param SimpleXMLElement $xml        XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa author.  
+	 * @param SimpleXMLElement $xml        XML from a Picasa Atom feed that has zero or more "entry" nodes represeing a Picasa author.
 	 *                                     Optional, the default is null.  If the $url parameter is null and the $xml parameter is null,
-	 *                                     a {@Picasa_Exception} is thrown.  
+	 *                                     a {@Picasa_Exception} is thrown.
 	 * @param array $contextArray          An array that can be passed to stream_context_create() to generate
-	 *                                     a PHP context.  See 
+	 *                                     a PHP context.  See
 	 *                                     {@link http://us2.php.net/manual/en/function.stream-context-create.php}
 	 * @param boolean $useCache            You can decide not to cache a specific request by passing false here.  You may
 	 *                                     want to do this, for instance, if you're requesting a private feed.
@@ -227,7 +227,7 @@ class Picasa_Author {
 				}
 			}
 			if ($authorXml == false) {
-			    throw Picasa::getExceptionFromInvalidQuery($url);	
+			    throw Picasa::getExceptionFromInvalidQuery($url);
 			}
 		}
 		try {
@@ -242,9 +242,9 @@ class Picasa_Author {
 		foreach($xml->entry as $author) {
 			$authorArray[$i] = new Picasa_Author($author);
 			$i++;
-		}			
+		}
 
 		return $authorArray;
-	}	
+	}
 
 }

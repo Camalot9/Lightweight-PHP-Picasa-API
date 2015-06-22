@@ -1,11 +1,11 @@
 <?php
 
-require_once('Picasa/Album.php');
-require_once('Picasa/Author.php');
-require_once('Picasa/Logger.php');
-require_once('Picasa/Cache.php');
+require_once PICASA_API_BASE_DIR . '/Picasa/Album.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Author.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Logger.php';
+require_once PICASA_API_BASE_DIR . '/Picasa/Cache.php';
 
-/**  
+/**
  * Represents a Picasa Account, which holds an array of Albums.  The general idea is to instantiate an instance
  * of this object using XML from Picasa's Atom feed and then access the needed information about the Picasa
  * account through getters and setters.
@@ -15,55 +15,55 @@ require_once('Picasa/Cache.php');
  * @license http://www.gnu.org/licenses/ GNU Public License Version 3
  * @copyright Copyright (c) 2007 Cameron Hinkle
  * @author Cameron Hinkle
- * @since 1.0 
+ * @since 1.0
  */
 class Picasa_Account {
 
 	/**
-	 * An array of {@link Picsaa_Album} objects for each album in the requested feed.    
-	 * @var array 
+	 * An array of {@link Picsaa_Album} objects for each album in the requested feed.
+	 * @var array
 	 */
-	private $albums;         
+	private $albums;
 
 	/**
-	 * The name of the Account's owner. 
+	 * The name of the Account's owner.
 	 * @var string
 	 * @deprecated Since Version 2.0.  Use {@link $picasaAuthor} instead.
 	 */
-	private $author;         
+	private $author;
 
 	/**
-	 * The base URL of the feed that was requested. 
+	 * The base URL of the feed that was requested.
 	 * @var string
 	 */
-	private $id;             
+	private $id;
 
 	/**
-	 * The account title, probably the owner's username. 
+	 * The account title, probably the owner's username.
 	 * @var string
 	 */
-	private $title;          
+	private $title;
 
 	/**
-	 * The account subtitle, probably blank.        
+	 * The account subtitle, probably blank.
 	 * @var string
 	 */
-	private $subtitle; 
+	private $subtitle;
 
 	/**
 	 * A URL to the account icon, probably the author's icon.
 	 * @var string
 	 */
-	private $icon; 
+	private $icon;
 
 	/**
 	 * The account author.
 	 * @var {@link Picasa_Author}
 	 * @since Version 2.0
 	 */
-	private $picasaAuthor; 
+	private $picasaAuthor;
 
-	/** 
+	/**
 	 * The URL to account in PicasaWeb.
 	 *
 	 * @access private
@@ -72,7 +72,7 @@ class Picasa_Account {
 	private $weblink;
 
 	/**
-	 * @return array 
+	 * @return array
 	 */
 	public function getAlbums () {
 		return $this->albums;
@@ -115,14 +115,14 @@ class Picasa_Account {
 	}
 
 	/**
-	 * @return Picasa_Author 
+	 * @return Picasa_Author
 	 */
 	public function getPicasaAuthor () {
 		return $this->picasaAuthor;
 	}
 
 	/**
-	 * @return string 
+	 * @return string
 	 * @access public
 	 */
 	public function getWeblink () {
@@ -196,16 +196,16 @@ class Picasa_Account {
 
 
 	/**
-	 * Constructs an Account object.  
+	 * Constructs an Account object.
 	 * This method assigns Album objects to the Account,
-	 * but the Album objects that are constructed will not initially contain Image objects.  This is 
+	 * but the Album objects that are constructed will not initially contain Image objects.  This is
 	 * because the XML that is returned from Picasa does not contain individual Image nodes
 	 * for each Album, presumeably because it could potentially take a lot of time to fetch
 	 * every image in an Account when all you likely need are the Albums.  Starting with version
 	 * 3.0 of this API, the images are fetched from Picasa when {@link Picasa_Album::getImages()}
-	 * is called and {@link Picasa_Album::$images} is null. 
-	 *  
-	 * @param string $url    The URL for the specific query that should be returned, as defined 
+	 * is called and {@link Picasa_Album::$images} is null.
+	 *
+	 * @param string $url    The URL for the specific query that should be returned, as defined
 	 *			 in Picasa's API documentation (http://code.google.com/apis/picasaweb/gdata.html).
 	 *			 Optional, the default is null.  If this parameter is null, the xml must
 	 *			 come from the $xml parameter.
@@ -218,7 +218,7 @@ class Picasa_Account {
 	 *                             might include needed authorization information.
 	 * @param boolean $useCache  You can decide not to cache a specific request by passing false here.  You may
 	 *                           want to do this, for instance, if you're requesting a private feed.
-	 * @throws Picasa_Exception  If valid XML cannot be retrieved from the URL specified in $url or $xml. 
+	 * @throws Picasa_Exception  If valid XML cannot be retrieved from the URL specified in $url or $xml.
 	 */
 	public function __construct ($url=null, SimpleXMLElement $xml=null, $contextArray=null, $useCache=true) {
 		if ($url != null) {
@@ -242,9 +242,9 @@ class Picasa_Account {
 				Picasa_Logger::getLogger()->logIfEnabled('Account retreived from cache.');
 			}
 			if ($xmldata === false) {
-				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);	
+				throw Picasa::getExceptionFromInvalidQuery($url, $contextArray);
 			}
-			
+
 			try {
 				// Load the XML file into a SimpleXMLElement
 				$xml = new SimpleXMLElement($xmldata);
@@ -271,11 +271,11 @@ class Picasa_Account {
 		$this->albums = array();
 		$i = 0;
 
-		// Create a blank Album object for each album in the account 
+		// Create a blank Album object for each album in the account
 		foreach($xml->entry as $albums) {
 			$this->albums[$i] = new Picasa_Album(null,$albums);
 			$i++;
-		}			
+		}
 	}
 
 	/**
@@ -284,7 +284,7 @@ class Picasa_Account {
 	 * @return string
 	 */
 	public function __toString() {
-		$retstring = " 
+		$retstring = "
 [ TYPE:        Picasa_Account
   ID:          ".$this->id."
   WEBLINK:     ".$this->weblink."
